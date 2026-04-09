@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+
+/** Resets window scroll when the route changes (SPA default is to keep scroll position). */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ThemeContext } from './context/ThemeContext';
 import Navbar from './components/Layout/Navbar';
@@ -49,6 +58,7 @@ function App() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <BrowserRouter>
+        <ScrollToTop />
         <div
           className={`flex flex-col min-h-screen transition-colors duration-300 ${
             theme === 'light' ? 'bg-[#f7f8fc]' : 'bg-neutral-950'

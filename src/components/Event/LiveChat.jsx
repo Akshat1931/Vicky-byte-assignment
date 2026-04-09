@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateChatMessage } from '../../data/mockChat';
-import { Send, Smile, Gift } from 'lucide-react';
+import { Send, Smile, Gift, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -10,6 +10,8 @@ export default function LiveChat() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
+  /** On small screens: hide message list by default so the player stays visible; user can expand to read chat. */
+  const [mobileFeedOpen, setMobileFeedOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const messageContainerRef = useRef(null);
 
@@ -45,6 +47,12 @@ export default function LiveChat() {
   useEffect(() => {
     if (isPinnedToBottom) scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (mobileFeedOpen && isPinnedToBottom) {
+      requestAnimationFrame(() => scrollToBottom());
+    }
+  }, [mobileFeedOpen]);
 
   const onMessagesScroll = () => {
     const el = messageContainerRef.current;
@@ -112,19 +120,44 @@ export default function LiveChat() {
 
   return (
     <div
-      className={`flex flex-col h-[min(420px,70vh)] sm:h-[min(480px,72vh)] lg:h-[min(560px,calc(100vh-7.5rem))] rounded-2xl overflow-hidden relative ${shell}`}
+      className={`flex flex-col rounded-2xl overflow-hidden relative w-full max-w-full max-lg:h-auto lg:h-[min(560px,calc(100vh-7.5rem))] ${
+        mobileFeedOpen ? 'max-lg:max-h-[min(420px,62vh)]' : ''
+      } ${shell}`}
     >
-      <div className={`p-3 sm:p-4 flex justify-between items-center ${headerBar}`}>
-        <h3 className={`font-bold flex items-center gap-2 text-sm sm:text-base ${headerTitle}`}>Live Chat</h3>
-        <span className={`text-[10px] font-medium tracking-wide border px-2 py-1 rounded ${badge}`}>
-          2.3k online
-        </span>
+      <div className={`p-3 sm:p-4 flex justify-between items-center gap-2 ${headerBar}`}>
+        <h3 className={`font-bold flex items-center gap-2 text-sm sm:text-base min-w-0 ${headerTitle}`}>
+          Live Chat
+        </h3>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={`text-[10px] font-medium tracking-wide border px-2 py-1 rounded ${badge}`}>
+            2.3k online
+          </span>
+          <button
+            type="button"
+            onClick={() => setMobileFeedOpen((v) => !v)}
+            className={`lg:hidden inline-flex items-center justify-center rounded-lg p-1.5 border transition-colors ${
+              isLight
+                ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                : 'border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10'
+            }`}
+            aria-expanded={mobileFeedOpen}
+            aria-label={mobileFeedOpen ? 'Hide chat messages' : 'Show chat messages'}
+          >
+            {mobileFeedOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       <div
         ref={messageContainerRef}
         onScroll={onMessagesScroll}
-        className={`flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 scrollbar-hide space-y-3 sm:space-y-4 ${scrollArea}`}
+        className={`flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 scrollbar-hide space-y-3 sm:space-y-4 ${scrollArea} ${
+          mobileFeedOpen ? 'max-lg:block max-lg:max-h-[min(220px,36vh)]' : 'max-lg:hidden'
+        } lg:block`}
       >
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
@@ -157,7 +190,9 @@ export default function LiveChat() {
         </AnimatePresence>
       </div>
 
-      <div className={`p-3 sm:p-4 w-full ${inputBar}`}>
+      <div
+        className={`p-3 sm:p-4 w-full ${inputBar} pb-[max(0.75rem,env(safe-area-inset-bottom))]`}
+      >
         <form onSubmit={handleSubmit} className="flex items-center gap-2 relative group w-full">
           <button type="button" className={`absolute left-3 transition-colors ${iconMuted}`} aria-label="Emoji">
             <Smile className="w-5 h-5" />

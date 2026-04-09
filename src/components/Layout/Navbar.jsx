@@ -39,7 +39,7 @@ export default function Navbar({ theme, onToggleTheme }) {
   return (
     <nav className="sticky top-0 z-50 w-full glass-panel border-b border-white/5 transition-colors duration-300">
       <div className="app-container">
-        <div className="flex justify-between items-center h-[68px] md:h-[72px]">
+        <div className="flex justify-between items-center min-h-[60px] sm:min-h-[64px] md:h-[72px] py-2 md:py-0">
           <div className="flex items-center gap-4 md:gap-6">
             <Link to="/" className="flex items-center gap-3 group">
             <div className="bg-indigo-500/10 p-2 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors duration-300">
@@ -168,6 +168,42 @@ export default function Navbar({ theme, onToggleTheme }) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Mobile / tablet: Following & Browse (hidden on lg+ where they sit in the top row) */}
+        <div
+          className={`lg:hidden flex items-center gap-2 pb-3 pt-1 -mx-1 px-1 overflow-x-auto scrollbar-hide border-t ${
+            theme === 'light' ? 'border-slate-200/80' : 'border-white/10'
+          }`}
+        >
+          <NavLink
+            to="/following"
+            className={({ isActive }) =>
+              `shrink-0 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                isActive
+                  ? 'bg-white text-black'
+                  : theme === 'light'
+                    ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    : 'text-neutral-300 hover:text-white hover:bg-white/10'
+              }`
+            }
+          >
+            Following
+          </NavLink>
+          <NavLink
+            to="/browse"
+            className={({ isActive }) =>
+              `shrink-0 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                isActive
+                  ? 'bg-white text-black'
+                  : theme === 'light'
+                    ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    : 'text-neutral-300 hover:text-white hover:bg-white/10'
+              }`
+            }
+          >
+            Browse
+          </NavLink>
         </div>
       </div>
     </nav>
