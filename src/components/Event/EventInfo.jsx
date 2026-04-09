@@ -57,11 +57,11 @@ export default function EventInfo({ event }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5 mt-4 sm:mt-0 relative">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mt-4 sm:mt-0 relative w-full sm:w-auto">
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+            className="flex items-center gap-1.5 sm:gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm font-bold transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]"
           >
             Donate
           </motion.button>
@@ -70,7 +70,7 @@ export default function EventInfo({ event }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setLiked((v) => !v)}
-            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
+            className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
           >
             <Heart className={`w-4 h-4 ml-[-2px] ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
             {likeCount.toLocaleString()}
@@ -79,17 +79,17 @@ export default function EventInfo({ event }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShare}
-            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
+            className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
           >
             <Share2 className="w-4 h-4 ml-[-2px]" /> 
             {copied ? 'Copied' : 'Share'}
           </motion.button>
-          <div className="relative isolate">
+          <div className="relative isolate ml-auto sm:ml-0">
             <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setMenuOpen((v) => !v)}
-            className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full transition-colors duration-200 flex-shrink-0 shadow-lg"
+            className="w-[36px] h-[36px] sm:w-10 sm:h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full transition-colors duration-200 flex-shrink-0 shadow-lg"
             >
               <EllipsisVertical className="w-4 h-4" />
             </motion.button>

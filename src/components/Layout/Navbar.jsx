@@ -48,7 +48,7 @@ export default function Navbar({ theme, onToggleTheme }) {
             <div className="bg-indigo-500/10 p-2 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polygon points="6 3 20 12 6 21 6 3" /></svg>
             </div>
-            <span className="font-bold text-lg md:text-xl tracking-tight text-white hidden sm:block">Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
+            <span className="font-bold text-lg md:text-xl tracking-tight text-white flex-shrink-0">Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
             </Link>
             <div className="hidden lg:flex items-center gap-2">
               <NavLink
