@@ -34,7 +34,7 @@ export default function EventInfo({ event }) {
     >
       <h1 className="text-3xl md:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">{event.title}</h1>
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-7 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-7 border-b border-white/5 relative z-50">
         {/* Creator Info */}
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl ring-2 ring-white/10 shadow-lg">
@@ -57,7 +57,15 @@ export default function EventInfo({ event }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 mt-4 sm:mt-0 relative">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+          >
+            Donate
+          </motion.button>
+          
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -76,7 +84,7 @@ export default function EventInfo({ event }) {
             <Share2 className="w-4 h-4 ml-[-2px]" /> 
             {copied ? 'Copied' : 'Share'}
           </motion.button>
-          <div className="relative">
+          <div className="relative isolate">
             <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -86,16 +94,31 @@ export default function EventInfo({ event }) {
               <EllipsisVertical className="w-4 h-4" />
             </motion.button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-lg border border-white/10 bg-[#090b12] p-1.5 shadow-xl">
-                <button className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5">Report stream</button>
-                <button className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5">Save for later</button>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute right-0 top-full mt-2 w-40 rounded-lg border border-white/10 bg-[#090b12] p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-[100]"
+              >
+                <button 
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5"
+                >
+                  Report stream
+                </button>
+                <button 
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5"
+                >
+                  Save for later
+                </button>
+              </motion.div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="mt-7 glass-panel rounded-2xl p-5 md:p-7">
+      <div className="mt-7 glass-panel rounded-2xl p-5 md:p-7 relative z-10">
         <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-neutral-400 mb-6 tracking-wide">
           <span className="text-white">{event.viewers.toLocaleString()} views</span>
           <span className="w-1 h-1 bg-white/20 rounded-full" />
