@@ -62,7 +62,7 @@ export default function EventGrid({ useContainer = true }) {
   return (
     <section
       id="events"
-      className={`${useContainer ? 'app-container' : ''} section-space relative`}
+      className={`${useContainer ? 'app-container section-space' : ''} relative`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-indigo-500/8 to-transparent blur-2xl" />
       <div className="mb-8 flex items-end justify-between gap-4">

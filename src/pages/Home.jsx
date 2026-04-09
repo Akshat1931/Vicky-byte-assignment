@@ -14,7 +14,7 @@ export default function Home() {
         <LiveChannelsRail />
         <div>
           <CategoryShelves />
-          <section className="mt-4 border-t border-white/10 pt-10 section-space">
+          <section className="mt-4 border-t border-white/10 pt-8 pb-8">
             <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">Explore everything</p>

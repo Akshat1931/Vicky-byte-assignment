@@ -12,6 +12,7 @@ function ScrollToTop() {
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ThemeContext } from './context/ThemeContext';
 import Navbar from './components/Layout/Navbar';
+import ScrollToTopButton from './components/Layout/ScrollToTopButton';
 import Home from './pages/Home';
 import EventDetail from './pages/EventDetail';
 import Browse from './pages/Browse';
@@ -65,9 +66,10 @@ function App() {
           }`}
         >
           <Navbar theme={theme} onToggleTheme={toggleTheme} />
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 flex flex-col">
             <AnimatedRoutes />
           </main>
+          <ScrollToTopButton />
         </div>
       </BrowserRouter>
     </ThemeContext.Provider>

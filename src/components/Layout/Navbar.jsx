@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Search, Bell, User, Sun, Moon, Check, ChevronRight } from 'lucide-react';
+import { Search, Bell, User, Sun, Moon, Check, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar({ theme, onToggleTheme }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  
   const [notifications] = useState([
     { id: 'n1', text: 'Neon Nights Virtual Concert is live now', time: '2m ago' },
     { id: 'n2', text: 'New event in Technology you may like', time: '15m ago' },
@@ -45,7 +48,7 @@ export default function Navbar({ theme, onToggleTheme }) {
             <div className="bg-indigo-500/10 p-2 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polygon points="6 3 20 12 6 21 6 3" /></svg>
             </div>
-            <span className="font-bold text-lg md:text-xl tracking-tight text-white">Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
+            <span className="font-bold text-lg md:text-xl tracking-tight text-white hidden sm:block">Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
             </Link>
             <div className="hidden lg:flex items-center gap-2">
               <NavLink
@@ -86,7 +89,15 @@ export default function Navbar({ theme, onToggleTheme }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4 text-neutral-300">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-neutral-300">
+            {/* Mobile Search Toggle */}
+            <button 
+              className="md:hidden hover:text-white transition-colors p-1"
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+            >
+              {isMobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+            </button>
+            
             <button
               onClick={onToggleTheme}
               className="hover:text-white transition-colors p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
@@ -102,7 +113,7 @@ export default function Navbar({ theme, onToggleTheme }) {
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-neutral-950 bg-rose-500"></span>
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-neutral-950 bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
               </button>
               {notificationsOpen && (
                 <div className={`absolute right-0 mt-2 w-72 rounded-xl border shadow-2xl p-2 ${
@@ -129,7 +140,7 @@ export default function Navbar({ theme, onToggleTheme }) {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen((v) => !v)}
-                className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white ring-2 ring-transparent hover:ring-indigo-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white ring-2 ring-transparent hover:ring-indigo-400 transition-all duration-200 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                 aria-label="Profile menu"
               >
                 <User className="w-4 h-4" />
@@ -206,6 +217,36 @@ export default function Navbar({ theme, onToggleTheme }) {
           </NavLink>
         </div>
       </div>
+
+      {/* Mobile Search Dropdown Overlay */}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className={`md:hidden border-t overflow-hidden ${theme === 'light' ? 'bg-white border-slate-200/80' : 'bg-[#030305]/95 border-white/5 backdrop-blur-xl'}`}
+          >
+            <div className="p-4">
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className={`h-4 w-4 ${theme === 'light' ? 'text-slate-400' : 'text-neutral-400'}`} />
+                </div>
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Search streams..." 
+                  className={`block w-full pl-10 pr-3 py-3 rounded-xl leading-5 border text-sm transition-all focus:outline-none focus:border-indigo-500 shadow-inner ${
+                    theme === 'light' 
+                      ? 'bg-slate-50 text-slate-800 placeholder:text-slate-400 border-slate-200' 
+                      : 'bg-neutral-900 text-white placeholder-neutral-500 border-white/10'
+                  }`}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
