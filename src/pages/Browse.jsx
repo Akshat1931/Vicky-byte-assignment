@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { CATEGORIES, mockEvents } from '../data/mockEvents';
+import EventCard from '../components/Home/EventCard';
 
 const FOLLOWED_CREATORS = ['ESL Network', 'DJ Synth', 'HoopsCentral', 'PixelStudios', 'ChessTV', 'BuildInPublic'];
 
@@ -17,37 +18,9 @@ function EventShelf({ title, events }) {
   return (
     <section className="mt-10 first:mt-2">
       <h3 className="text-lg md:text-xl font-semibold text-white mb-4">{title}</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {visible.map((event) => (
-          <Link
-            key={`${title}-${event.id}`}
-            to={`/event/${event.id}`}
-            className="rounded-xl overflow-hidden border border-white/10 bg-white/[0.02] hover:border-indigo-400/40 transition-colors"
-          >
-            <div className="relative aspect-video">
-              <img
-                src={event.imageUrl}
-                alt={event.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              {event.isLive && (
-                <>
-                  <span className="absolute left-2 top-2 rounded bg-rose-500/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                    LIVE
-                  </span>
-                  <span className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-[11px] font-medium text-white">
-                    {event.viewers.toLocaleString()} viewers
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="p-3">
-              <p className="text-sm font-medium text-white line-clamp-2">{event.title}</p>
-              <p className="text-xs text-neutral-400 mt-1">{event.creator}</p>
-            </div>
-          </Link>
+          <EventCard key={`${title}-${event.id}`} event={event} />
         ))}
       </div>
       {hasMore && (

@@ -1,45 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { mockEvents } from '../../data/mockEvents';
+import EventCard from './EventCard';
 
-const INITIAL_ROW = 4;
-
-function StreamCard({ event }) {
-  return (
-    <Link
-      to={`/event/${event.id}`}
-      className="group overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] hover:border-indigo-400/35 transition-colors"
-    >
-      <div className="relative aspect-video">
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
-        />
-        {event.isLive && (
-          <>
-            <span className="absolute left-2 top-2 rounded bg-rose-500/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-              LIVE
-            </span>
-            <span className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-[11px] font-medium text-white">
-              {event.viewers.toLocaleString()} viewers
-            </span>
-          </>
-        )}
-      </div>
-      <div className="p-3">
-        <p className="line-clamp-2 text-sm font-medium text-white">{event.title}</p>
-        <p className="mt-1 text-xs text-neutral-400">
-          {event.creator}
-          <span className="text-neutral-500"> · {event.category}</span>
-        </p>
-      </div>
-    </Link>
-  );
-}
+const INITIAL_ROW = 3;
 
 function Shelf({ title, subtitle, events, initialCount = INITIAL_ROW }) {
   const [expanded, setExpanded] = useState(false);
@@ -57,9 +21,9 @@ function Shelf({ title, subtitle, events, initialCount = INITIAL_ROW }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {visible.map((event) => (
-          <StreamCard key={`${title}-${event.id}`} event={event} />
+          <EventCard key={`${title}-${event.id}`} event={event} />
         ))}
       </div>
 

@@ -48,13 +48,13 @@ export default function EventDetail() {
 
         {/* Live Chat Column */}
         {!chatCollapsed && (
-          <aside className="order-2 lg:order-none lg:col-span-4 xl:col-span-3 lg:row-start-1 lg:row-span-2 min-w-0 self-start lg:sticky lg:top-20 xl:top-24 z-10 transition-all duration-500">
+          <aside className="order-3 lg:order-none lg:col-span-4 xl:col-span-3 lg:row-start-1 lg:row-span-2 min-w-0 self-start lg:sticky lg:top-20 xl:top-24 z-10 transition-all duration-500">
             <LiveChat onCollapse={() => setChatCollapsed(true)} />
           </aside>
         )}
 
         {/* Meta Controls & Info */}
-        <div className={`order-3 lg:order-none ${chatCollapsed ? 'lg:col-span-8 xl:col-span-9' : 'lg:col-span-8 xl:col-span-9'} lg:row-start-2 min-w-0 space-y-4 sm:space-y-5 transition-all duration-500 mx-auto w-full`}>
+        <div className={`order-2 lg:order-none ${chatCollapsed ? 'lg:col-span-8 xl:col-span-9' : 'lg:col-span-8 xl:col-span-9'} lg:row-start-2 min-w-0 space-y-4 sm:space-y-5 transition-all duration-500 mx-auto w-full`}>
           <StreamControls event={event} />
           <EventInfo event={event} />
           <StreamProfilePanel event={event} />
