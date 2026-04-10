@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { mockEvents } from '../data/mockEvents';
 import EventCard from '../components/Home/EventCard';
 import { Heart, Play, Calendar, Activity, Zap } from 'lucide-react';
@@ -14,6 +14,8 @@ const FOLLOWED_CREATORS = [
 ];
 
 function CreatorCapsule({ creator, index }) {
+  const [imgError, setImgError] = useState(false);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,8 +28,19 @@ function CreatorCapsule({ creator, index }) {
         ? 'ring-[3px] ring-indigo-500 ring-offset-4 ring-offset-[#030305] group-hover:ring-rose-500' 
         : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'
       }`}>
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl relative">
-          <img src={creator.image} alt={creator.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125" />
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl relative bg-white/5">
+          {!imgError ? (
+            <img 
+              src={creator.image} 
+              alt={creator.name}
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125" 
+            />
+          ) : (
+            <div className={`w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center`}>
+              <span className="text-xl font-black text-white/40">{creator.name[0]}</span>
+            </div>
+          )}
           {creator.isLive && (
              <div className="absolute inset-0 bg-indigo-500/10 group-hover:bg-rose-500/10 transition-colors" />
           )}
@@ -52,16 +65,20 @@ function CreatorCapsule({ creator, index }) {
   );
 }
 
-export default function Following() {
-  const followedNames = FOLLOWED_CREATORS.map(c => c.name);
-  
-  const followedEvents = useMemo(() => {
-    return mockEvents.filter(e => followedNames.includes(e.creator));
-  }, [followedNames]);
+const FOLLOWED_NAMES = FOLLOWED_CREATORS.map(c => c.name);
+const SORTED_CREATORS_STATIC = [...FOLLOWED_CREATORS].sort((a, b) => (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0));
 
-  const sortedCreators = [...FOLLOWED_CREATORS].sort((a, b) => (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0));
-  const liveNow = followedEvents.filter(e => e.isLive);
-  const upcoming = followedEvents.filter(e => !e.isLive);
+export default function Following() {
+  const followedEvents = useMemo(() => {
+    return mockEvents.filter(e => FOLLOWED_NAMES.includes(e.creator));
+  }, []);
+
+  const sortedCreators = SORTED_CREATORS_STATIC;
+  
+  const { liveNow, upcoming } = useMemo(() => ({
+    liveNow: followedEvents.filter(e => e.isLive),
+    upcoming: followedEvents.filter(e => !e.isLive)
+  }), [followedEvents]);
 
   return (
     <div className="app-container py-8 md:py-12 space-y-12 md:space-y-16 relative">

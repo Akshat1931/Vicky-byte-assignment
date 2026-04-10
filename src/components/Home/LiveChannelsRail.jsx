@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ArrowUpDown, Settings, Compass, Users } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef, memo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ArrowUpDown, Settings, Compass, Users, LayoutDashboard, User, CreditCard } from 'lucide-react';
 import { mockEvents, CATEGORIES } from '../../data/mockEvents';
 
 const AVATAR_COLORS = [
@@ -42,38 +42,41 @@ const FOLLOWED = ['TechDaily', 'SpeedHunters', 'ArtVisionaries', 'CodeAcademy', 
 
 function SectionLabel({ label, collapsed, rightEl }) {
   return (
-    <AnimatePresence initial={false}>
-      {!collapsed && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="flex items-center justify-between px-3 mb-1.5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
-          {rightEl}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div 
+      style={{ maxHeight: collapsed ? '0px' : '30px', marginBottom: collapsed ? '0px' : '0.375rem' }}
+      className="flex items-center justify-between px-3 transition-all duration-300 overflow-hidden"
+    >
+      <p className={`text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500 transition-opacity duration-300 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>{label}</p>
+      <div className={`transition-opacity duration-300 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
+        {rightEl}
+      </div>
+    </div>
   );
 }
 
 function ShowMore({ collapsed, expanded, onToggle, count, threshold }) {
   if (count <= threshold) return null;
   return (
-    <AnimatePresence initial={false}>
-      {!collapsed && (
-        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onToggle}
-          className="w-full text-left px-3 py-1 text-[12px] text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
-          {expanded ? '↑ Show Less' : '↓ Show More'}
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <div 
+      style={{ maxHeight: collapsed ? '0px' : '40px' }}
+      className="overflow-hidden transition-all duration-300"
+    >
+      <button
+        onClick={onToggle}
+        className="w-full text-left px-3 py-1 text-[12px] text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+        {expanded ? '↑ Show Less' : '↓ Show More'}
+      </button>
+    </div>
   );
 }
 
-function ChannelRow({ event, collapsed, isLive }) {
+const ChannelRow = memo(({ event, collapsed, isLive }) => {
+  if (!event) return null;
   return (
     <Link to={`/event/${event.id}`}
       title={collapsed ? `${event.creator}${isLive ? ` — ${formatViewers(event.viewers)} viewers` : ' (Offline)'}` : undefined}
-      className={`flex items-center w-full py-2 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-0' : 'gap-2.5 px-2'}`}>
+      style={{ '--hover-bg': 'var(--sidebar-hover)' }}
+      className={`flex items-center w-full py-2 hover:bg-[var(--sidebar-hover)] transition-colors group ${collapsed ? 'justify-center px-3 gap-0' : 'gap-2.5 px-2'}`}>
       <div className="relative flex-shrink-0">
         <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColor(event.creator)} flex items-center justify-center font-bold text-white text-xs ring-2 ring-black/30 ${!isLive ? 'opacity-50 group-hover:opacity-80 transition-opacity' : ''}`}>
           {initials(event.creator)}
@@ -82,35 +85,32 @@ function ChannelRow({ event, collapsed, isLive }) {
           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-[2px] border-[#0a0a0f] shadow-[0_0_7px_rgba(244,63,94,0.9)]" />
         )}
       </div>
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            className="min-w-0 flex-1 flex items-center justify-between gap-1">
-            <div className="min-w-0">
-              <p className={`text-[13px] font-medium truncate leading-tight group-hover:text-white ${isLive ? 'text-neutral-100' : 'text-neutral-400'}`}>
-                {event.creator}
-              </p>
-              <p className="text-[11px] text-neutral-600 truncate leading-tight">
-                {isLive ? event.category : (event.schedule || event.category)}
-              </p>
+      <div 
+        style={{ width: collapsed ? '0px' : 'auto', visibility: collapsed ? 'hidden' : 'visible' }}
+        className={`min-w-0 flex-1 flex items-center justify-between gap-1 transition-all duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      >
+        <div className="min-w-0">
+          <p className="text-[13px] font-medium truncate leading-tight group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--sidebar-text-primary)' }}>
+            {event.creator}
+          </p>
+          <p className="text-[11px] truncate leading-tight" style={{ color: 'var(--sidebar-text-secondary)' }}>
+            {isLive ? event.category : (event.schedule || event.category)}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          {isLive ? (
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+              <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(event.viewers)}</span>
             </div>
-            <div className="flex-shrink-0">
-              {isLive ? (
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                  <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(event.viewers)}</span>
-                </div>
-              ) : (
-                <span className="text-[11px] text-neutral-600">Offline</span>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ) : (
+            <span className="text-[11px] text-neutral-600">Offline</span>
+          )}
+        </div>
+      </div>
     </Link>
   );
-}
+});
 
 export default function LiveChannelsRail({ collapsed, onToggle }) {
   const [showMoreFollowed, setShowMoreFollowed] = useState(false);
@@ -128,15 +128,24 @@ export default function LiveChannelsRail({ collapsed, onToggle }) {
   return (
     <motion.aside
       animate={{ width: collapsed ? 60 : 240 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="hidden xl:flex flex-col fixed left-0 top-[72px] bottom-0 z-40 bg-[#0a0a0f] border-r border-white/8 overflow-hidden"
+      transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.8 }}
+      style={{ 
+        backgroundColor: 'var(--sidebar-bg)',
+        borderColor: 'var(--sidebar-border)',
+        willChange: 'width'
+      }}
+      className="hidden xl:flex flex-col fixed left-0 top-[72px] bottom-0 z-40 border-r overflow-hidden"
     >
       {/* ── Header ── */}
-      <div className={`flex items-center py-3 px-2 border-b border-white/5 flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+      <div 
+        style={{ borderColor: 'var(--sidebar-border)' }}
+        className={`flex items-center py-3 px-2 border-b flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}
+      >
         <AnimatePresence initial={false}>
           {!collapsed && (
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="text-[13px] font-bold text-neutral-100 pl-1">For You</motion.span>
+              style={{ color: 'var(--sidebar-text-primary)' }}
+              className="text-[13px] font-bold pl-1">For You</motion.span>
           )}
         </AnimatePresence>
         <button onClick={onToggle}
@@ -148,7 +157,7 @@ export default function LiveChannelsRail({ collapsed, onToggle }) {
 
       {/* ── Scrollable body ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-        <div className="py-3 space-y-5">
+        <div className={`py-3 transition-all duration-300 ${collapsed ? 'space-y-2' : 'space-y-5'}`}>
 
           {/* ── FOLLOWED CHANNELS ── */}
           <section>
@@ -176,53 +185,54 @@ export default function LiveChannelsRail({ collapsed, onToggle }) {
             {catViewers.map(({ cat, viewers }) => (
               <Link key={cat} to="/browse"
                 title={collapsed ? cat : undefined}
-                className={`flex items-center gap-2.5 py-1.5 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-1' : 'px-2'}`}>
+                className={`flex items-center py-1.5 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-3 gap-0' : 'gap-2.5 px-3'}`}>
                 <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${CAT_COLORS[cat] || 'from-neutral-700 to-neutral-800'} flex-shrink-0 flex items-center justify-center shadow`}>
                   <span className="text-[9px] font-extrabold text-white/90">{cat.slice(0, 2).toUpperCase()}</span>
                 </div>
-                <AnimatePresence initial={false}>
-                  {!collapsed && (
-                    <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                      className="min-w-0 flex-1 flex items-center justify-between gap-1">
-                      <div>
-                        <p className="text-[13px] font-medium text-neutral-200 truncate group-hover:text-white">{cat}</p>
-                        <p className="text-[11px] text-neutral-600">{viewers > 0 ? 'Live now' : 'Browse'}</p>
-                      </div>
-                      {viewers > 0 && (
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                          <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(viewers)}</span>
-                        </div>
-                      )}
-                    </motion.div>
+                <div 
+                  style={{ width: collapsed ? '0px' : 'auto', visibility: collapsed ? 'hidden' : 'visible' }}
+                  className={`min-w-0 flex-1 flex items-center justify-between gap-1 transition-all duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                >
+                  <div>
+                    <p className="text-[13px] font-medium text-neutral-200 truncate group-hover:text-indigo-400 transition-colors">{cat}</p>
+                    <p className="text-[11px] text-neutral-600 truncate">{viewers > 0 ? 'Live now' : 'Browse'}</p>
+                  </div>
+                  {viewers > 0 && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                      <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(viewers)}</span>
+                    </div>
                   )}
-                </AnimatePresence>
-              </Link>
+                </div>
+             </Link>
             ))}
           </section>
 
-          {/* ── FOOTER LINKS ── */}
-          <AnimatePresence initial={false}>
-            {!collapsed && (
-              <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="px-3 pt-2 pb-4 border-t border-white/5">
-                <div className="space-y-1 mt-2">
-                  {[
-                    { icon: <Compass className="w-3.5 h-3.5" />, label: 'Browse All', to: '/browse' },
-                    { icon: <Users className="w-3.5 h-3.5" />, label: 'Following', to: '/following' },
-                    { icon: <Settings className="w-3.5 h-3.5" />, label: 'Settings', to: '/' },
-                  ].map(({ icon, label, to }) => (
-                    <Link key={label} to={to}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-colors">
-                      {icon}
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-                <p className="mt-4 text-[10px] text-neutral-700 px-2">© 2026 StreamSphere</p>
-              </motion.section>
-            )}
-          </AnimatePresence>
+          {/* ── SECONDARY DISCOVERY ── */}
+          <section 
+            style={{ 
+              maxHeight: collapsed ? '0px' : '200px', 
+              paddingBottom: collapsed ? '0px' : '1rem', 
+              paddingTop: collapsed ? '0px' : '0.5rem', 
+              opacity: collapsed ? 0 : 1,
+              borderColor: 'var(--sidebar-border)'
+            }}
+            className="px-3 border-t transition-all duration-300 overflow-hidden" 
+          >
+            <div className="space-y-1 mt-2">
+              {[
+                { icon: <Compass className="w-3.5 h-3.5" />, label: 'Browse All', to: '/browse' },
+                { icon: <Users className="w-3.5 h-3.5" />, label: 'Following', to: '/following' },
+              ].map(({ icon, label, to }) => (
+                <Link key={label} to={to}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-colors">
+                  {icon}
+                  {label}
+                </Link>
+              ))}
+            </div>
+            <p className="mt-4 text-[10px] text-neutral-700 px-2">© 2026 StreamSphere</p>
+          </section>
 
         </div>
       </div>

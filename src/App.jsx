@@ -1,15 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ThemeContext } from './context/ThemeContext';
 import Navbar from './components/Layout/Navbar';
 import ScrollToTopButton from './components/Layout/ScrollToTopButton';
 import LiveChannelsRail from './components/Home/LiveChannelsRail';
+import UndoToast from './components/Common/UndoToast';
+import { StreamingProvider } from './context/StreamingContext';
 import Home from './pages/Home';
 import EventDetail from './pages/EventDetail';
 import Browse from './pages/Browse';
 import Following from './pages/Following';
 import Search from './pages/Search';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Subscriptions from './pages/Subscriptions';
+import Settings from './pages/Settings';
 
 // Media query hook — no SSR issues, no double renders
 function useIsXL() {
@@ -31,7 +37,7 @@ function ScrollToTop() {
   return null;
 }
 
-function AnimatedRoutes() {
+const AnimatedRoutes = memo(function AnimatedRoutes() {
   const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
   return (
@@ -48,12 +54,16 @@ function AnimatedRoutes() {
           <Route path="/browse" element={<Browse />} />
           <Route path="/following" element={<Following />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/event/:id" element={<EventDetail />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
   );
-}
+});
 
 function App() {
   const isXL = useIsXL();
@@ -80,33 +90,34 @@ function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <BrowserRouter>
-        <ScrollToTop />
-        <div
-          className={`flex flex-col min-h-screen transition-colors duration-300 ${
-            theme === 'light' ? 'bg-[#f7f8fc]' : 'bg-neutral-950'
-          }`}
-        >
-          <Navbar theme={theme} onToggleTheme={toggleTheme} />
-
-          {/* Global fixed sidebar — xl only */}
-          <LiveChannelsRail
-            collapsed={sidebarCollapsed}
-            onToggle={() => setSidebarCollapsed((v) => !v)}
-          />
-
-          {/* Main content — single render, margin driven by JS media query */}
-          <motion.main
-            className="flex-1 min-w-0 flex flex-col"
-            animate={{ marginLeft }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      <StreamingProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <div
+            className={`flex flex-col min-h-screen transition-colors duration-300 ${
+              theme === 'light' ? 'bg-[#f7f8fc]' : 'bg-neutral-950'
+            }`}
           >
-            <AnimatedRoutes />
-          </motion.main>
+            <Navbar theme={theme} onToggleTheme={toggleTheme} />
 
-          <ScrollToTopButton />
-        </div>
-      </BrowserRouter>
+            <LiveChannelsRail
+              collapsed={sidebarCollapsed}
+              onToggle={() => setSidebarCollapsed((v) => !v)}
+            />
+
+            <motion.main
+              className="flex-1 min-w-0 flex flex-col"
+              animate={{ marginLeft }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.8 }}
+            >
+              <AnimatedRoutes />
+            </motion.main>
+
+            <ScrollToTopButton />
+            <UndoToast />
+          </div>
+        </BrowserRouter>
+      </StreamingProvider>
     </ThemeContext.Provider>
   );
 }

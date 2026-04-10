@@ -1,12 +1,38 @@
-import { useState, useCallback } from 'react';
-import { Share2, Heart as HeartIcon, EllipsisVertical } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Share2, Heart as HeartIcon, EllipsisVertical, X, Flag, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
+
+const AVATAR_COLORS = [
+  'from-rose-500 to-pink-600', 'from-indigo-500 to-blue-600',
+  'from-emerald-500 to-teal-600', 'from-amber-500 to-orange-600',
+  'from-violet-500 to-purple-600', 'from-cyan-500 to-sky-500',
+  'from-fuchsia-500 to-rose-600', 'from-lime-500 to-green-600',
+];
+
+function avatarColor(creator) {
+  let h = 0;
+  for (let i = 0; i < (creator || '').length; i++) h = creator.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+const REPORT_REASONS = [
+  "Inappropriate Content",
+  "Copyright / Stolen",
+  "Spam or Scams",
+  "Harassment",
+  "Other"
+];
 
 export default function EventInfo({ event }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reportStep, setReportStep] = useState('none'); // 'none', 'reasons', 'success'
 
   // Toggle Like ONLY (Professional behavior)
   const handleLike = useCallback(() => {
@@ -30,6 +56,15 @@ export default function EventInfo({ event }) {
     }
   };
 
+  useEffect(() => {
+    if (reportStep === 'success') {
+      const timer = setTimeout(() => {
+        setReportStep('none');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [reportStep]);
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -42,7 +77,9 @@ export default function EventInfo({ event }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-7 border-b border-white/5 relative z-50">
         {/* Creator Info */}
         <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10 shadow-lg">
+          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr ${avatarColor(event.creator)} flex items-center justify-center text-white font-bold text-lg ring-2 shadow-lg ${
+            isLight ? 'ring-white/10' : 'ring-white/10'
+          }`}>
             {event.creator.charAt(0)}
           </div>
           <div>
@@ -114,11 +151,67 @@ export default function EventInfo({ event }) {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-white/10 bg-[#0d0f14]/95 backdrop-blur-xl p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-[200]"
+                  className={`absolute right-0 top-full mt-2 w-48 rounded-xl border p-1.5 shadow-2xl z-[200] ${
+                    isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14]/95 border-white/10 backdrop-blur-xl'
+                  }`}
                 >
-                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-rose-400 hover:bg-white/5 transition-colors">Report stream</button>
-                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-100 hover:bg-white/5 transition-colors">Save for later</button>
-                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-100 hover:bg-white/5 transition-colors">Not interested</button>
+                  <button 
+                    onClick={() => { setReportStep('reasons'); setMenuOpen(false); }} 
+                    className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      isLight ? 'text-rose-600 hover:bg-rose-50' : 'text-rose-400 hover:bg-white/5'
+                    }`}
+                  >
+                    Report stream
+                  </button>
+                  <button onClick={() => setMenuOpen(false)} className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${isLight ? 'text-slate-700 hover:bg-slate-50' : 'text-neutral-100 hover:bg-white/5'}`}>Save for later</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Event Info Report Overlay (Dropdown replacement style) */}
+            <AnimatePresence>
+              {reportStep !== 'none' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                  className={`absolute right-0 top-full mt-2 w-64 rounded-2xl border p-4 shadow-2xl z-[300] ${
+                    isLight ? 'bg-white border-slate-200' : 'bg-[#12141a] border-white/10 backdrop-blur-3xl'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-white'}`}>Report Stream</h4>
+                    <button onClick={() => setReportStep('none')} className={`p-1 rounded-full transition-colors ${isLight ? 'hover:bg-slate-100 text-slate-400' : 'hover:bg-white/10 text-white/60'}`}>
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {reportStep === 'reasons' && (
+                    <div className="space-y-1.5">
+                      {REPORT_REASONS.map(reason => (
+                        <button
+                          key={reason}
+                          onClick={() => setReportStep('success')}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-between group ${
+                            isLight ? 'text-slate-700 bg-slate-50 hover:bg-indigo-600 hover:text-white' : 'text-white/80 bg-white/5 hover:bg-indigo-600 hover:text-white'
+                          }`}
+                        >
+                          {reason}
+                          <Flag className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {reportStep === 'success' && (
+                    <div className="text-center py-4 space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 mx-auto">
+                        <CheckCircle2 className="w-6 h-6 text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className={`font-black text-xs uppercase tracking-tight mb-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>Report Submitted</p>
+                        <p className={`text-[11px] leading-relaxed ${isLight ? 'text-slate-500' : 'text-white/60'}`}>Thanks for the feedback!</p>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -127,14 +220,23 @@ export default function EventInfo({ event }) {
       </div>
 
       {/* Stats & Description */}
-      <div className="mt-7 glass-panel rounded-2xl p-5 md:p-7 relative z-10">
+      <div className="mt-7 glass-panel rounded-2xl p-5 md:p-7 relative z-10 transition-colors">
         <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-medium text-neutral-400 mb-6 tracking-wide">
-          <span className="text-white">{event.viewers.toLocaleString()} views</span>
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${event.isLive ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
+            <span className={isLight ? 'text-slate-900 font-bold' : 'text-white'}>
+               {event.isLive ? `${event.viewers.toLocaleString()} watching` : event.schedule}
+            </span>
+          </div>
           <span className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>Premiered {event.schedule}</span>
-          <span className="text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer ml-auto">#{event.category}</span>
+          <span className={isLight ? 'text-slate-500' : ''}>Performance in {event.category}</span>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">
+              #{event.category}
+            </span>
+          </div>
         </div>
-        <p className="text-neutral-300 leading-relaxed whitespace-pre-wrap font-light text-sm md:text-base">
+        <p className={`leading-relaxed whitespace-pre-wrap font-light text-sm md:text-base ${isLight ? 'text-slate-700' : 'text-neutral-300'}`}>
           {event.description}
           <br /><br />
           Join {event.creator} in this exclusive live broadcast! Don't forget to like and subscribe for more amazing content to never miss another drop.

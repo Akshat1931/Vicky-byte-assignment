@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { mockEvents } from '../../data/mockEvents';
+import { useStreaming } from '../../context/StreamingContext';
 import EventCard from './EventCard';
 
 function useAdaptiveCount() {
@@ -46,10 +48,20 @@ function Shelf({ title, subtitle, events, initialCount }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 transition-all duration-300">
-        {visible.map((event) => (
-          <EventCard key={`${title}-${event.id}`} event={event} />
-        ))}
+      <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 transition-all duration-300">
+        <AnimatePresence mode="popLayout">
+          {visible.map((event) => (
+            <motion.div
+              key={`${title}-${event.id}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, x: -100, transition: { duration: 0.3 } }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <EventCard event={event} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {hasMore && (
@@ -70,19 +82,28 @@ function Shelf({ title, subtitle, events, initialCount }) {
 
 export default function CategoryShelves() {
   const adaptiveCount = useAdaptiveCount();
+  const { hiddenIds } = useStreaming();
 
-  const livePicks = [...mockEvents]
-    .filter((event) => event.isLive)
-    .sort((a, b) => b.viewers - a.viewers);
+  const filteredEvents = useMemo(() => {
+    return mockEvents.filter(event => !hiddenIds.some(hid => String(hid) === String(event.id)));
+  }, [hiddenIds]);
 
-  const recommendedMix = [...mockEvents]
-    .filter((event) => !event.isLive)
-    .sort((a, b) => b.likes - a.likes)
-    .slice(0, 12);
+  const livePicks = useMemo(() => {
+    return [...filteredEvents]
+      .filter((event) => event.isLive)
+      .sort((a, b) => b.viewers - a.viewers);
+  }, [filteredEvents]);
 
-  const gaming = mockEvents.filter((event) => event.category === 'Gaming');
-  const music = mockEvents.filter((event) => event.category === 'Music');
-  const tech = mockEvents.filter((event) => event.category === 'Technology');
+  const recommendedMix = useMemo(() => {
+    return [...filteredEvents]
+      .filter((event) => !event.isLive)
+      .sort((a, b) => b.likes - a.likes)
+      .slice(0, 12);
+  }, [filteredEvents]);
+
+  const gaming = useMemo(() => filteredEvents.filter((event) => event.category === 'Gaming'), [filteredEvents]);
+  const music = useMemo(() => filteredEvents.filter((event) => event.category === 'Music'), [filteredEvents]);
+  const tech = useMemo(() => filteredEvents.filter((event) => event.category === 'Technology'), [filteredEvents]);
 
   return (
     <div className="pb-8">

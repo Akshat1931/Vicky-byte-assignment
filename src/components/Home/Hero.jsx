@@ -49,9 +49,6 @@ export default function Hero() {
 
   // Smooth Exit fade-out of the fixed container so it gracefully transitions into the EventGrid
   const exitOpacity = useTransform(smoothProgress, [0.85, 1], [1, 0]);
-  const stageIntroOpacity = useTransform(scrollYProgress, [0, 0.2, 0.32], [1, 1, 0]);
-  const stageRevealOpacity = useTransform(scrollYProgress, [0.22, 0.45, 0.66], [0, 1, 0]);
-  const stageEnterOpacity = useTransform(scrollYProgress, [0.62, 0.8, 1], [0, 1, 1]);
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
@@ -72,17 +69,6 @@ export default function Hero() {
 
         {/* Cinematic HUD (additive only, does not alter choreography) */}
         <div className="pointer-events-none absolute inset-0 z-40 hidden md:block">
-          <div className="absolute left-8 top-24 flex flex-col gap-2 text-[11px] uppercase tracking-[0.16em] text-neutral-300/80">
-            <motion.span style={{ opacity: stageIntroOpacity }} className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 backdrop-blur-md">
-              Stage 1 · Intro
-            </motion.span>
-            <motion.span style={{ opacity: stageRevealOpacity }} className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 backdrop-blur-md">
-              Stage 2 · Reveal
-            </motion.span>
-            <motion.span style={{ opacity: stageEnterOpacity }} className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 backdrop-blur-md">
-              Stage 3 · Enter
-            </motion.span>
-          </div>
           <div className="absolute right-8 top-1/2 -translate-y-1/2 h-48 w-1 rounded-full bg-white/10 overflow-hidden">
             <motion.div
               className="w-full origin-bottom bg-gradient-to-t from-indigo-500 via-purple-400 to-pink-400"

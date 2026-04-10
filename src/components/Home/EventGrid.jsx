@@ -1,10 +1,11 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams, Link } from 'react-router-dom';
 import { mockEvents, CATEGORIES } from '../../data/mockEvents';
 import EventCard from './EventCard';
 import { Search, ListFilter, ChevronDown, Check, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useStreaming } from '../../context/StreamingContext';
 
 const SkeletonCard = () => (
   <div className="bg-[#0a0a0f] rounded-2xl overflow-hidden border border-white/5 h-full min-h-[320px]">
@@ -72,7 +73,7 @@ function NoResults({ query, recommendedEvents }) {
   );
 }
 
-export default function EventGrid({ useContainer = true }) {
+const EventGrid = memo(function EventGrid({ useContainer = true }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const [searchParams] = useSearchParams();
@@ -98,8 +99,14 @@ export default function EventGrid({ useContainer = true }) {
     return () => window.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const { hiddenIds } = useStreaming();
+
   const filteredEvents = useMemo(() => {
-    let result = sessionEvents.filter((event) => {
+    return sessionEvents.filter((event) => {
+      // Bulletproof ID matching - handles string/number mismatches
+      const isHidden = hiddenIds.some(hid => String(hid) === String(event.id));
+      if (isHidden) return false;
+
       const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
       const matchesSearch = !query || 
         event.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -129,7 +136,7 @@ export default function EventGrid({ useContainer = true }) {
     }
 
     return result;
-  }, [sessionEvents, activeCategory, sortBy, query]);
+  }, [sessionEvents, activeCategory, sortBy, query, hiddenIds]);
 
   const topRecommended = useMemo(() => {
     return [...sessionEvents]
@@ -225,14 +232,26 @@ export default function EventGrid({ useContainer = true }) {
            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : filteredEvents.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-          {filteredEvents.map(event => (
-            <EventCard key={event.id} event={event} />
-          ))}
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+          <AnimatePresence mode="popLayout">
+            {filteredEvents.map(event => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <EventCard event={event} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       ) : (
         <NoResults query={query} recommendedEvents={topRecommended} />
       )}
     </section>
   );
-}
+});
+
+export default EventGrid;
