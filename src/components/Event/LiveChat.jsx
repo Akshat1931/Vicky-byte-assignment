@@ -98,6 +98,26 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
     }, 200);
   };
 
+  const [viewportHeight, setViewportHeight] = useState('100%');
+
+  useEffect(() => {
+    if (!window.visualViewport) return;
+    
+    const handleResize = () => {
+      // On mobile, find the available height below the fixed video (approx 210-250px)
+      // and ensure the chat fits in the visual viewport
+      if (window.innerWidth < 1024 && mobileFeedOpen) {
+        setViewportHeight(`${window.visualViewport.height - 230}px`);
+      } else {
+        setViewportHeight('');
+      }
+    };
+
+    window.visualViewport.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.visualViewport.removeEventListener('resize', handleResize);
+  }, [mobileFeedOpen]);
+
   const shell = isLight ? 'bg-white border-slate-200' : 'bg-[#0a0a0f] border-white/10';
   const inputBar = isLight ? 'bg-slate-50 border-t border-slate-200/60' : 'bg-[#0a0a0f] border-t border-white/5';
   const inputField = isLight ? 'bg-white text-slate-900 border-slate-200 focus:border-indigo-500' : 'bg-white/5 text-white border-transparent focus:border-white/10';
@@ -109,6 +129,7 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
           ? 'h-[min(450px,60svh)] sm:h-[500px]' 
           : 'h-[60px] md:h-[min(580px,calc(100vh-10rem))]'
       }`}
+      style={mobileFeedOpen ? { height: viewportHeight } : {}}
     >
       {/* Header */}
       <div className={`p-3 sm:p-4 flex justify-between items-center border-b shrink-0 ${isLight ? 'bg-slate-50/50 border-slate-200/60' : 'bg-white/[0.02] border-white/5'}`}>

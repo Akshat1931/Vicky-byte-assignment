@@ -227,8 +227,8 @@ export default function EventCard({ event }) {
               {event.category}
             </span>
             {event.isLive
-              ? <span className="text-xs font-semibold bg-rose-500/15 text-rose-300 px-2.5 py-1 rounded-full border border-rose-500/30">🔴 Live</span>
-              : <span className="text-xs font-semibold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-full border border-indigo-500/25">📅 Upcoming</span>
+              ? <span className="text-xs font-semibold bg-rose-500/15 text-rose-500 px-2.5 py-1 rounded-full border border-rose-500/30">🔴 Live</span>
+              : <span className="text-xs font-semibold bg-indigo-500/15 text-indigo-500 px-2.5 py-1 rounded-full border border-indigo-500/25">📅 Upcoming</span>
             }
           </div>
         </div>

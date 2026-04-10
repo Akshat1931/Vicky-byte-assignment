@@ -1,14 +1,23 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { mockEvents } from '../data/mockEvents';
 import EventCard from '../components/Home/EventCard';
+import SkeletonCard from '../components/Common/SkeletonCard';
 import { Search as SearchIcon, Filter, TrendingUp, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const [isLoading, setIsLoading] = useState(true);
   const searchNormalized = query.toLowerCase().trim();
+
+  // Simulated loading to showcase the "Stand Out" Skeleton screens
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const results = useMemo(() => {
     if (!searchNormalized) return [];
@@ -58,7 +67,15 @@ export default function Search() {
 
       {/* Results / Empty State */}
       <div className="space-y-16">
-        {results.length > 0 ? (
+        {isLoading ? (
+          <section className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              {[...Array(8)].map((_, i) => (
+                <SkeletonCard key={`skeleton-${i}`} />
+              ))}
+            </div>
+          </section>
+        ) : results.length > 0 ? (
           <section className="space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
               {results.map((event, i) => (

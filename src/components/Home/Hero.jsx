@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { mockEvents } from '../../data/mockEvents';
 import { Play } from 'lucide-react';
 
@@ -118,9 +119,9 @@ export default function Hero() {
             className="absolute left-[5%] md:left-[15%] w-48 md:w-[320px] aspect-[3/4] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto"
             style={{ x: leftX, y: leftY, rotateZ: leftRotate, opacity: leftOpacity, willChange: 'transform, opacity' }}
           >
-            <div className="w-full h-full relative cursor-pointer group">
+            <Link to={`/event/${featuredEvents[1].id}`} className="w-full h-full relative cursor-pointer group block">
               <img src={featuredEvents[1].imageUrl} alt="Sub Event" className="w-full h-full object-cover mix-blend-luminosity opacity-80 group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700" />
-            </div>
+            </Link>
           </Motion.div>
 
           {/* Right Sub-Card */}
@@ -128,9 +129,9 @@ export default function Hero() {
             className="absolute right-[5%] md:right-[15%] w-40 md:w-[280px] aspect-[4/5] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto"
             style={{ x: rightX, y: rightY, rotateZ: rightRotate, opacity: rightOpacity, willChange: 'transform, opacity' }}
           >
-             <div className="w-full h-full relative cursor-pointer group">
+             <Link to={`/event/${featuredEvents[2].id}`} className="w-full h-full relative cursor-pointer group block">
                <img src={featuredEvents[2].imageUrl} alt="Secondary Event" className="w-full h-full object-cover mix-blend-luminosity opacity-70 group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700" />
-             </div>
+             </Link>
           </Motion.div>
 
           {/* Main Dominant Center Card */}
@@ -138,7 +139,7 @@ export default function Hero() {
             className="absolute z-30 w-[90%] md:w-[750px] aspect-video rounded-[32px] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.9),0_0_40px_rgba(99,102,241,0.2)] border border-white/10 pointer-events-auto bg-black"
             style={{ y: mainY, scale: mainScale, rotateX: mainRotateX, willChange: 'transform' }}
           >
-            <div className="w-full h-full relative group cursor-pointer">
+            <div className="w-full h-full relative group">
               <img src={featuredEvents[0].imageUrl} alt="Main Event" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-8 md:p-12 transition-opacity duration-300">
                  <div className="flex items-center gap-3 mb-4">
@@ -148,13 +149,18 @@ export default function Hero() {
                  </div>
                  <h3 className="text-3xl md:text-5xl font-black text-white mb-2 md:mb-4 tracking-tight drop-shadow-xl">{featuredEvents[0].title}</h3>
                  <p className="text-neutral-300 text-sm md:text-lg mb-6 md:mb-8 font-light drop-shadow-md">{featuredEvents[0].creator}</p>
-                 <Motion.button 
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
-                   className="flex items-center justify-center gap-2 bg-white text-black font-semibold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-2xl w-max transition-colors hover:bg-neutral-200 pointer-events-auto"
+                 <Link 
+                   to={`/event/${featuredEvents[0].id}`}
+                   className="pointer-events-auto"
                  >
-                   <Play className="w-5 h-5 fill-black" /> Enter Stream
-                 </Motion.button>
+                   <Motion.button 
+                     whileHover={{ scale: 1.05 }}
+                     whileTap={{ scale: 0.95 }}
+                     className="flex items-center justify-center gap-2 bg-white text-black font-semibold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-2xl w-max transition-colors hover:bg-neutral-200"
+                   >
+                     <Play className="w-5 h-5 fill-black" /> Enter Stream
+                   </Motion.button>
+                 </Link>
               </div>
             </div>
           </Motion.div>
