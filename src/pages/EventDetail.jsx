@@ -17,6 +17,13 @@ export default function EventDetail() {
   // New state for mobile sticky video overlay
   const [isPiPActive, setIsPiPActive] = useState(false);
 
+  // Sync state with body class for global components (Navbar) to respond
+  useEffect(() => {
+    if (isPiPActive) document.body.classList.add('pip-active');
+    else document.body.classList.remove('pip-active');
+    return () => document.body.classList.remove('pip-active');
+  }, [isPiPActive]);
+
   if (!event) return <Navigate to="/" replace />;
 
   return (
