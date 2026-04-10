@@ -1,8 +1,9 @@
-import { useMemo, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, Link } from 'react-router-dom';
 import { mockEvents, CATEGORIES } from '../../data/mockEvents';
 import EventCard from './EventCard';
-import { Search, ListFilter } from 'lucide-react';
+import { Search, ListFilter, ChevronDown, Check, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 const SkeletonCard = () => (
@@ -19,6 +20,15 @@ const SkeletonCard = () => (
   </div>
 );
 
+const SORT_OPTIONS = [
+  { id: 'recommended', label: 'Recommended' },
+  { id: 'viewers-high', label: 'Most Viewers' },
+  { id: 'viewers-low', label: 'Fewest Viewers' },
+  { id: 'likes', label: 'Most Liked' },
+];
+
+const INITIAL_ROW = 4;
+
 function buildSessionEvents() {
   return mockEvents.map((event) => {
     if (!event.isLive) return event;
@@ -30,34 +40,104 @@ function buildSessionEvents() {
   });
 }
 
+function NoResults({ query, recommendedEvents }) {
+  return (
+    <div className="space-y-12 py-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center text-center p-12 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl"
+      >
+        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
+          <Search className="w-8 h-8 text-neutral-500" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-2">No results for "{query}"</h3>
+        <p className="text-neutral-500 max-w-sm">Try searching for something else, or check out these popular streams instead.</p>
+      </motion.div>
+
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h4 className="text-lg font-bold text-white flex items-center gap-2">
+            <Info className="w-5 h-5 text-indigo-400" />
+            Try these instead
+          </h4>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {recommendedEvents.slice(0, 4).map(event => (
+            <EventCard key={`rec-${event.id}`} event={event} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EventGrid({ useContainer = true }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
+  
   const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('recommended');
+  const [sortOpen, setSortOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sessionEvents] = useState(() => buildSessionEvents());
+  const sortRef = useRef(null);
 
-  // Simulate network request for premium feel
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const filteredEvents = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return sessionEvents.filter((event) => {
+    let result = sessionEvents.filter((event) => {
       const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
-      const matchesSearch =
-        query.length === 0 ||
-        event.title.toLowerCase().includes(query) ||
-        event.creator.toLowerCase().includes(query) ||
-        event.category.toLowerCase().includes(query) ||
-        event.description.toLowerCase().includes(query) ||
-        (event.previewMessage && event.previewMessage.toLowerCase().includes(query));
+      const matchesSearch = !query || 
+        event.title.toLowerCase().includes(query.toLowerCase()) ||
+        event.creator.toLowerCase().includes(query.toLowerCase()) ||
+        event.category.toLowerCase().includes(query.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [sessionEvents, activeCategory, searchQuery]);
+
+    // Apply Sorting
+    switch (sortBy) {
+      case 'viewers-high':
+        result.sort((a, b) => b.viewers - a.viewers);
+        break;
+      case 'viewers-low':
+        result.sort((a, b) => a.viewers - b.viewers);
+        break;
+      case 'likes':
+        result.sort((a, b) => b.likes - a.likes);
+        break;
+      default:
+        result.sort((a, b) => {
+          if (a.isLive && !b.isLive) return -1;
+          if (!a.isLive && b.isLive) return 1;
+          return 0;
+        });
+        break;
+    }
+
+    return result;
+  }, [sessionEvents, activeCategory, sortBy, query]);
+
+  const topRecommended = useMemo(() => {
+    return [...sessionEvents]
+      .sort((a, b) => b.viewers - a.viewers)
+      .slice(0, 8);
+  }, [sessionEvents]);
+
+  const activeSortLabel = SORT_OPTIONS.find(o => o.id === sortBy)?.label;
 
   return (
     <section
@@ -65,80 +145,93 @@ export default function EventGrid({ useContainer = true }) {
       className={`${useContainer ? 'app-container section-space' : ''} relative`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-indigo-500/8 to-transparent blur-2xl" />
-      <div className="mb-8 flex items-end justify-between gap-4">
+      
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">Explore</p>
-          <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-white">Live & Upcoming Events</h2>
-        </div>
-        <p className="text-sm text-neutral-400 hidden sm:block">{filteredEvents.length} results</p>
-      </div>
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-10">
-        <div className="w-full md:w-[400px] relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search
-              className={`h-5 w-5 transition-colors group-focus-within:text-indigo-500 ${
-                isLight ? 'text-slate-400' : 'text-neutral-500'
-              }`}
-            />
-          </div>
-          <input
-            type="text"
-            placeholder="Search events..."
-            className={`w-full pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 font-light shadow-lg ${
-              isLight
-                ? 'bg-white text-slate-800 placeholder:text-slate-400 border border-slate-200'
-                : 'bg-[#0a0a0f] border border-white/10 text-white glass-panel'
-            }`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+            {query ? `Search results for "${query}"` : 'Live & Upcoming Events'}
+          </h2>
         </div>
         
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-4 md:pb-0 scrollbar-hide py-1">
-          <div className="flex items-center gap-2 mr-3 text-neutral-400">
-            <ListFilter className="w-4 h-4" /> 
-            <span className="text-sm font-medium uppercase tracking-widest opacity-80 border-r border-white/10 pr-4">Filters</span>
-          </div>
-          {CATEGORIES.map(category => (
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeCategory === category 
-                  ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]' 
-                  : 'bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'
+        <div className="flex items-center gap-4">
+          <div className="relative" ref={sortRef}>
+            <button 
+              onClick={() => setSortOpen(!sortOpen)}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${
+                isLight 
+                  ? 'bg-white border-slate-200 text-slate-700 hover:border-slate-300' 
+                  : 'bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white'
               }`}
             >
-              {category}
-            </motion.button>
-          ))}
+              <ListFilter className="w-4 h-4 text-indigo-400" />
+              <span className="text-sm font-semibold">Sort: {activeSortLabel}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${sortOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {sortOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className={`absolute right-0 md:left-0 top-full mt-2 w-56 rounded-2xl border p-2 shadow-2xl z-[100] ${
+                      isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14]/95 border-white/15 backdrop-blur-3xl'
+                  }`}
+                >
+                  {SORT_OPTIONS.map(opt => (
+                    <button 
+                      key={opt.id}
+                      onClick={() => { setSortBy(opt.id); setSortOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
+                          sortBy === opt.id 
+                          ? 'bg-indigo-500 text-white font-bold' 
+                          : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      {opt.label}
+                      {sortBy === opt.id && <Check className="w-4 h-4" />}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          <p className="text-sm text-neutral-500 font-medium hidden lg:block">{filteredEvents.length} results</p>
         </div>
       </div>
 
-      {/* Grid */}
+      <div className="flex items-center gap-2 overflow-x-auto w-full pb-8 scrollbar-hide py-1">
+        {CATEGORIES.map(category => (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 border ${
+              activeCategory === category 
+                ? 'bg-white text-black border-white shadow-[0_10px_20px_rgba(255,255,255,0.1)]' 
+                : 'bg-white/5 text-neutral-400 border-white/5 hover:border-white/20 hover:text-white'
+            }`}
+          >
+            {category}
+          </motion.button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-           {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+           {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
-      ) : (
+      ) : filteredEvents.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {filteredEvents.map(event => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>
-      )}
-      
-      {!isLoading && filteredEvents.length === 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-32 glass-panel rounded-2xl border border-white/5 mt-8"
-        >
-          <p className="text-neutral-400 text-lg font-light">No events found matching your criteria.</p>
-        </motion.div>
+      ) : (
+        <NoResults query={query} recommendedEvents={topRecommended} />
       )}
     </section>
   );

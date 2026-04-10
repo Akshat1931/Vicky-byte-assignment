@@ -18,7 +18,7 @@ const EMOTES = [
   { id: 'star', icon: <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" /> },
 ];
 
-export default function VideoPlayer({ event }) {
+export default function VideoPlayer({ event, isPiPActive }) {
   const videoId = 'jfKfPfyJRdk';
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -39,12 +39,18 @@ export default function VideoPlayer({ event }) {
     setTimeout(() => setFloatingEmotes((prev) => prev.filter((e) => e.id !== newEmote.id)), 2000);
   }, []);
 
+  // Sticky Overlay classes for mobile PiP mode - snap to ABSOLUTE TOP (top-0)
+  const pipClasses = isPiPActive 
+    ? `fixed top-0 left-0 w-full z-[130] rounded-none shadow-[0_15px_30px_rgba(0,0,0,0.6)] border-b transition-all duration-300 ${isDark ? 'border-white/10' : 'border-slate-200'}` 
+    : '';
+
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-      className={`w-full relative bg-black overflow-hidden border transition-all duration-500 ${
-        theme === 'light' ? 'border-slate-200 shadow-xl' : 'border-white/10 shadow-2xl'
-      } ${theater ? 'rounded-none aspect-[21/9]' : 'rounded-2xl sm:rounded-3xl aspect-video'}`}
+      layout
+      transition={{ type: "spring", stiffness: 350, damping: 35 }}
+      className={`w-full relative bg-black overflow-hidden border transition-all duration-500 ${pipClasses} ${
+        theme === 'light' ? 'border-slate-200' : 'border-white/10'
+      } ${theater && !isPiPActive ? 'rounded-none aspect-[21/9]' : 'rounded-2xl sm:rounded-3xl aspect-video'}`}
     >
       {/* ── LIVE badge ── */}
       {event.isLive && (
@@ -56,7 +62,7 @@ export default function VideoPlayer({ event }) {
       )}
 
       {/* ── Settings Gear ── */}
-      <div className="absolute top-4 right-4 z-40">
+      <div className={`absolute top-4 right-4 z-40 transition-opacity duration-300 ${isPiPActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <button
           onClick={() => { setSettingsOpen(v => !v); setEmoteMenuOpen(false); }}
           className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border transition-all outline-none ${
@@ -69,7 +75,7 @@ export default function VideoPlayer({ event }) {
 
       {/* ── Adaptive Settings Menu ── */}
       <AnimatePresence>
-        {settingsOpen && (
+        {settingsOpen && !isPiPActive && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSettingsOpen(false)} className="absolute inset-0 bg-black/10 backdrop-blur-[1px] z-30" />
@@ -137,7 +143,7 @@ export default function VideoPlayer({ event }) {
       </AnimatePresence>
 
       {/* ── Reactions ── */}
-      <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+      <div className={`absolute bottom-4 right-4 z-40 flex items-center gap-2 transition-opacity duration-300 ${isPiPActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <AnimatePresence>
           {emoteMenuOpen && (
             <motion.div initial={{ opacity: 0, scale: 0.8, x: 20 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8, x: 20 }}

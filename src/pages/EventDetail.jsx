@@ -13,27 +13,35 @@ export default function EventDetail() {
   const { id } = useParams();
   const event = mockEvents.find((e) => e.id === id);
   const [chatCollapsed, setChatCollapsed] = useState(false);
+  
+  // New state for mobile sticky video overlay
+  const [isPiPActive, setIsPiPActive] = useState(false);
 
   if (!event) return <Navigate to="/" replace />;
 
   return (
-    <div className="app-container py-4 sm:py-6 lg:py-8 relative">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 transition-all duration-500">
+    <div className={`app-container relative transition-all duration-300 ${
+      isPiPActive ? 'py-0' : 'py-4 sm:py-6 lg:py-8'
+    }`}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 transition-all duration-500">
 
-        {/* ── Video ── */}
+        {/* ── Video Container ── */}
         <div
           className={`
             order-1
             ${chatCollapsed
-              ? 'md:col-start-1 md:col-span-12'
-              : 'md:col-start-1 md:col-span-8 lg:col-span-8 xl:col-span-9'}
-            md:row-start-1 min-w-0 relative transition-all duration-500
+              ? 'lg:col-start-1 lg:col-span-12'
+              : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
+            lg:row-start-1 min-w-0 relative transition-all duration-500
           `}
         >
-          <VideoPlayer event={event} />
+          {/* GHOST PLACEHOLDER: accounts for the video space when fixed at top */}
+          <div className={`hidden max-lg:block transition-all duration-300 ${isPiPActive ? 'aspect-video w-full' : 'h-0 opacity-0'}`} />
+
+          <VideoPlayer event={event} isPiPActive={isPiPActive} />
 
           <AnimatePresence>
-            {chatCollapsed && (
+            {chatCollapsed && !isPiPActive && (
               <motion.button
                 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -52,17 +60,20 @@ export default function EventDetail() {
           <aside
             className={`
               order-2
-              md:col-start-9 xl:col-start-10
-              md:col-span-4 xl:col-span-3
-              md:row-start-1 md:row-span-2
-              min-w-0 self-start md:sticky md:top-20 xl:top-24 z-10 transition-all duration-500
+              lg:col-start-9 xl:col-start-10
+              lg:col-span-4 xl:col-span-3
+              lg:row-start-1 lg:row-span-2
+              min-w-0 self-start lg:sticky lg:top-20 xl:top-24 z-10 transition-all duration-500
             `}
           >
-            <LiveChat onCollapse={() => setChatCollapsed(true)} />
+            <LiveChat 
+              onCollapse={() => setChatCollapsed(true)} 
+              onFocusChange={(focused) => setIsPiPActive(focused && window.innerWidth < 1024)}
+            />
           </aside>
         )}
 
-        {/* ── Info/Meta ── Mobile: order 3 | Desktop: explicit col 1-8 row 2 */}
+        {/* ── Info/Meta ── */}
         <div
           className={`
             order-3
@@ -70,6 +81,7 @@ export default function EventDetail() {
               ? 'lg:col-start-1 lg:col-span-12'
               : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
             lg:row-start-2 min-w-0 space-y-4 sm:space-y-5 transition-all duration-500
+            ${isPiPActive ? 'opacity-30 blur-[2px] pointer-events-none' : ''}
           `}
         >
           <EventInfo event={event} />

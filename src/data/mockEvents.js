@@ -295,5 +295,17 @@ export const mockEvents = [
     viewers: 41200,
     likes: 5320,
     description: 'Non-stop blitz chess matches with live tactical analysis and audience predictions.'
+  },
+  {
+    id: '25',
+    title: 'Digital World 2026: Future of VR',
+    creator: 'MetaFrontier',
+    imageUrl: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?q=80&w=2072&auto=format&fit=crop',
+    category: 'Technology',
+    schedule: 'Oct 30, 11:30 AM',
+    isLive: false,
+    viewers: 0,
+    likes: 1340,
+    description: 'Explore the boundaries of virtual and augmented reality in this immersive technical showcase.'
   }
 ];

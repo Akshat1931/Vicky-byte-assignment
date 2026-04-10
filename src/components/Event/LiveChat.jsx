@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const COMMON_EMOJIS = ['😂', '❤️', '🔥', '👍', '👋', '🎉', '😮', '💯', '✨', '🙌'];
 
-export default function LiveChat({ onCollapse }) {
+export default function LiveChat({ onCollapse, onFocusChange }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const [messages, setMessages] = useState([]);
@@ -54,7 +54,9 @@ export default function LiveChat({ onCollapse }) {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (emojiRef.current && !emojiRef.current.contains(e.target)) setEmojiPickerOpen(false);
+      if (emojiRef.current && !emojiRef.current.contains(e.target)) {
+        setEmojiPickerOpen(false);
+      }
     };
     window.addEventListener('mousedown', handleClickOutside);
     return () => window.removeEventListener('mousedown', handleClickOutside);
@@ -84,6 +86,18 @@ export default function LiveChat({ onCollapse }) {
 
   const addEmoji = (emoji) => setInputMessage(prev => prev + emoji);
 
+  const handleInputFocus = () => {
+    if (onFocusChange) onFocusChange(true);
+    setMobileFeedOpen(true); 
+  };
+
+  const handleInputBlur = () => {
+    // Keep it focused for a moment to allow emoji interaction
+    setTimeout(() => {
+      if (onFocusChange) onFocusChange(false);
+    }, 200);
+  };
+
   const shell = isLight ? 'bg-white border-slate-200' : 'bg-[#0a0a0f] border-white/10';
   const inputBar = isLight ? 'bg-slate-50 border-t border-slate-200/60' : 'bg-[#0a0a0f] border-t border-white/5';
   const inputField = isLight ? 'bg-white text-slate-900 border-slate-200 focus:border-indigo-500' : 'bg-white/5 text-white border-transparent focus:border-white/10';
@@ -91,7 +105,9 @@ export default function LiveChat({ onCollapse }) {
   return (
     <div 
       className={`flex flex-col rounded-2xl overflow-hidden relative w-full border shadow-2xl transition-all duration-300 ${shell} ${
-        mobileFeedOpen ? 'h-[450px] sm:h-[500px]' : 'h-[60px] md:h-[min(580px,calc(100vh-10rem))]'
+        mobileFeedOpen 
+          ? 'h-[min(450px,60svh)] sm:h-[500px]' 
+          : 'h-[60px] md:h-[min(580px,calc(100vh-10rem))]'
       }`}
     >
       {/* Header */}
@@ -168,6 +184,8 @@ export default function LiveChat({ onCollapse }) {
             <input
               type="text"
               value={inputMessage}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Send a message..."
               className={`flex-1 text-sm rounded-full py-2 px-4 focus:outline-none transition-all border ${inputField}`}

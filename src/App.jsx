@@ -8,6 +8,8 @@ import LiveChannelsRail from './components/Home/LiveChannelsRail';
 import Home from './pages/Home';
 import EventDetail from './pages/EventDetail';
 import Browse from './pages/Browse';
+import Following from './pages/Following';
+import Search from './pages/Search';
 
 // Media query hook — no SSR issues, no double renders
 function useIsXL() {
@@ -35,7 +37,7 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={location.pathname}
+        key={location.pathname + location.search}
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
@@ -44,7 +46,8 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
-          <Route path="/following" element={<Browse />} />
+          <Route path="/following" element={<Following />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/event/:id" element={<EventDetail />} />
         </Routes>
       </motion.div>

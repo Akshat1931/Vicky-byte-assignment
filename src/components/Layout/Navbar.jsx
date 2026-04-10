@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { Search, Bell, User, Sun, Moon, Check, ChevronRight, X } from 'lucide-react';
+import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, Bell, User, Sun, Moon, Check, ChevronRight, X, LayoutGrid, Gamepad2, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { mockEvents } from '../../data/mockEvents';
 
 export default function Navbar({ theme, onToggleTheme }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -15,6 +22,7 @@ export default function Navbar({ theme, onToggleTheme }) {
   ]);
   const bellRef = useRef(null);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     const onClick = (event) => {
@@ -24,11 +32,15 @@ export default function Navbar({ theme, onToggleTheme }) {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
     };
     const onEsc = (event) => {
       if (event.key === 'Escape') {
         setNotificationsOpen(false);
         setProfileOpen(false);
+        setShowSuggestions(false);
       }
     };
     window.addEventListener('click', onClick);
@@ -38,6 +50,44 @@ export default function Navbar({ theme, onToggleTheme }) {
       window.removeEventListener('keydown', onEsc);
     };
   }, []);
+
+  // Sync state if URL changes externally
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
+
+  // Handle live suggestions
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      const q = searchQuery.toLowerCase();
+      const filtered = mockEvents.filter(e => 
+        e.title.toLowerCase().includes(q) || 
+        e.creator.toLowerCase().includes(q) ||
+        e.category.toLowerCase().includes(q)
+      ).slice(0, 6);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
+
+  const handleSearch = (e) => {
+    e?.preventDefault?.();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+    setShowSuggestions(false);
+    setIsMobileSearchOpen(false);
+  };
+
+  const selectSuggestion = (q) => {
+    setSearchQuery(q);
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setShowSuggestions(false);
+    setIsMobileSearchOpen(false);
+  };
 
   return (
     <nav className={`sticky top-0 z-[100] w-full border-b transition-colors duration-300 ${
@@ -70,7 +120,11 @@ export default function Navbar({ theme, onToggleTheme }) {
               <NavLink
                 to="/browse"
                 className={({ isActive }) =>
-                  `rounded-full px-3 py-1.5 text-sm transition-colors ${isActive ? 'bg-white text-black' : 'text-neutral-300 hover:text-white hover:bg-white/10'}`
+                  `rounded-full px-3 py-1.5 text-sm transition-colors ${
+                    isActive 
+                    ? (theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black')
+                    : (theme === 'light' ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-neutral-300 hover:text-white hover:bg-white/10')
+                  }`
                 }
               >
                 Browse
@@ -78,8 +132,8 @@ export default function Navbar({ theme, onToggleTheme }) {
             </div>
           </div>
           
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
+          <div className="hidden md:flex items-center flex-1 max-w-md mx-8 relative" ref={searchRef}>
+            <form onSubmit={handleSearch} className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search
                   className={`h-4 w-4 ${theme === 'light' ? 'text-slate-400' : 'text-neutral-400'}`}
@@ -87,6 +141,9 @@ export default function Navbar({ theme, onToggleTheme }) {
               </div>
               <input
                 type="text"
+                value={searchQuery}
+                onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search events, streams, or creators..."
                 className={`block w-full pl-10 pr-3 py-2 rounded-full leading-5 border sm:text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/35 ${
                   theme === 'light'
@@ -94,7 +151,40 @@ export default function Navbar({ theme, onToggleTheme }) {
                     : 'bg-neutral-900 text-neutral-300 placeholder-neutral-500 border-transparent focus:bg-white focus:text-neutral-900 focus:border-indigo-500'
                 }`}
               />
-            </div>
+            </form>
+
+            {/* Desktop Autocomplete Dropdown */}
+            <AnimatePresence>
+                {showSuggestions && suggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className={`absolute top-full left-0 right-0 mt-2 rounded-2xl border shadow-2xl overflow-hidden z-[110] ${
+                      theme === 'light' ? 'bg-white border-slate-200' : 'bg-[#090b12] border-white/10 backdrop-blur-3xl'
+                    }`}
+                  >
+                    <div className="py-2">
+                       {suggestions.map((s) => (
+                         <button
+                           key={s.id}
+                           onClick={() => selectSuggestion(s.title)}
+                           className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                             theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-white/5'
+                           }`}
+                         >
+                            <div className="p-2 rounded-lg bg-indigo-500/10">
+                               {s.isLive ? <TrendingUp className="w-3.5 h-3.5 text-rose-500" /> : <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />}
+                            </div>
+                            <div className="min-w-0">
+                               <p className={`text-sm font-bold truncate ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>{s.title}</p>
+                               <p className="text-[11px] text-neutral-500">{s.creator} • {s.category}</p>
+                            </div>
+                         </button>
+                       ))}
+                    </div>
+                  </motion.div>
+                )}
+            </AnimatePresence>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-neutral-300">
@@ -124,7 +214,7 @@ export default function Navbar({ theme, onToggleTheme }) {
                 <span className="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-neutral-950 bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
               </button>
               {notificationsOpen && (
-                <div className={`absolute right-0 mt-2 w-72 rounded-xl border shadow-2xl p-2 ${
+                <div className={`absolute right-0 mt-2 w-72 rounded-xl border shadow-2xl p-2 z-[110] ${
                   theme === 'light'
                     ? 'border-slate-200 bg-white'
                     : 'border-white/10 bg-[#090b12]'
@@ -154,7 +244,7 @@ export default function Navbar({ theme, onToggleTheme }) {
                 <User className="w-4 h-4" />
               </button>
               {profileOpen && (
-                <div className={`absolute right-0 mt-2 w-56 rounded-xl border shadow-2xl p-2 ${
+                <div className={`absolute right-0 mt-2 w-56 rounded-xl border shadow-2xl p-2 z-[110] ${
                   theme === 'light'
                     ? 'border-slate-200 bg-white'
                     : 'border-white/10 bg-[#090b12]'
@@ -189,7 +279,7 @@ export default function Navbar({ theme, onToggleTheme }) {
           </div>
         </div>
 
-        {/* Mobile / tablet: Following & Browse (hidden on lg+ where they sit in the top row) */}
+        {/* Mobile / tablet navigation */}
         <div
           className={`lg:hidden flex items-center gap-2 pb-3 pt-1 -mx-1 px-1 overflow-x-auto scrollbar-hide border-t ${
             theme === 'light' ? 'border-slate-200/80' : 'border-white/10'
@@ -226,7 +316,7 @@ export default function Navbar({ theme, onToggleTheme }) {
         </div>
       </div>
 
-      {/* Mobile Search Dropdown Overlay */}
+      {/* Mobile Search Overlay */}
       <AnimatePresence>
         {isMobileSearchOpen && (
           <motion.div 
@@ -235,14 +325,16 @@ export default function Navbar({ theme, onToggleTheme }) {
             exit={{ height: 0, opacity: 0 }}
             className={`md:hidden border-t overflow-hidden ${theme === 'light' ? 'bg-white border-slate-200/80' : 'bg-[#030305]/95 border-white/5 backdrop-blur-xl'}`}
           >
-            <div className="p-4">
-              <div className="relative w-full">
+            <div className="p-4 relative">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className={`h-4 w-4 ${theme === 'light' ? 'text-slate-400' : 'text-neutral-400'}`} />
                 </div>
                 <input 
                   type="text" 
                   autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search streams..." 
                   className={`block w-full pl-10 pr-3 py-3 rounded-xl leading-5 border text-sm transition-all focus:outline-none focus:border-indigo-500 shadow-inner ${
                     theme === 'light' 
@@ -250,7 +342,23 @@ export default function Navbar({ theme, onToggleTheme }) {
                       : 'bg-neutral-900 text-white placeholder-neutral-500 border-white/10'
                   }`}
                 />
-              </div>
+              </form>
+
+              {/* Mobile suggestions */}
+              {suggestions.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-white/5 space-y-1">
+                   {suggestions.map(s => (
+                     <button
+                        key={`mob-${s.id}`}
+                        onClick={() => selectSuggestion(s.title)}
+                        className="w-full flex items-center gap-3 py-2 text-left"
+                     >
+                        <Search className="w-3.5 h-3.5 text-neutral-500" />
+                        <span className="text-sm text-neutral-300 truncate">{s.title}</span>
+                     </button>
+                   ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
