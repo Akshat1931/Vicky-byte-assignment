@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { mockEvents } from '../data/mockEvents';
 import VideoPlayer from '../components/Event/VideoPlayer';
