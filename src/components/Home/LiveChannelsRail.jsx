@@ -1,33 +1,231 @@
-import { Eye } from 'lucide-react';
-import { mockEvents } from '../../data/mockEvents';
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ArrowUpDown, Settings, Compass, Users } from 'lucide-react';
+import { mockEvents, CATEGORIES } from '../../data/mockEvents';
 
-export default function LiveChannelsRail() {
-  const liveEvents = mockEvents.filter((event) => event.isLive);
+const AVATAR_COLORS = [
+  'from-rose-500 to-pink-600', 'from-indigo-500 to-blue-600',
+  'from-emerald-500 to-teal-600', 'from-amber-500 to-orange-600',
+  'from-violet-500 to-purple-600', 'from-cyan-500 to-sky-500',
+  'from-fuchsia-500 to-rose-600', 'from-lime-500 to-green-600',
+];
+function avatarColor(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function initials(creator) {
+  return creator.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+function formatViewers(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return n.toString();
+}
 
-  if (liveEvents.length === 0) return null;
+const CAT_COLORS = {
+  Gaming: 'from-indigo-600 to-purple-700',
+  Music: 'from-rose-600 to-pink-700',
+  Technology: 'from-cyan-600 to-blue-700',
+  Sports: 'from-emerald-600 to-teal-700',
+  Entertainment: 'from-amber-600 to-orange-700',
+  Art: 'from-fuchsia-600 to-violet-700',
+  Education: 'from-lime-600 to-green-700',
+};
+
+// Simulated followed (offline) creators
+const FOLLOWED = ['TechDaily', 'SpeedHunters', 'ArtVisionaries', 'CodeAcademy', 'ActionSports', 'DesignDock', 'MidnightBeats', 'AstroTalks'].map(name => {
+  const ev = mockEvents.find(e => e.creator === name);
+  return ev || { id: name, creator: name, category: 'Streaming', schedule: 'Offline' };
+});
+
+function SectionLabel({ label, collapsed, rightEl }) {
+  return (
+    <AnimatePresence initial={false}>
+      {!collapsed && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="flex items-center justify-between px-3 mb-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
+          {rightEl}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function ShowMore({ collapsed, expanded, onToggle, count, threshold }) {
+  if (count <= threshold) return null;
+  return (
+    <AnimatePresence initial={false}>
+      {!collapsed && (
+        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={onToggle}
+          className="w-full text-left px-3 py-1 text-[12px] text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+          {expanded ? '↑ Show Less' : '↓ Show More'}
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function ChannelRow({ event, collapsed, isLive }) {
+  return (
+    <Link to={`/event/${event.id}`}
+      title={collapsed ? `${event.creator}${isLive ? ` — ${formatViewers(event.viewers)} viewers` : ' (Offline)'}` : undefined}
+      className={`flex items-center w-full py-2 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-0' : 'gap-2.5 px-2'}`}>
+      <div className="relative flex-shrink-0">
+        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColor(event.creator)} flex items-center justify-center font-bold text-white text-xs ring-2 ring-black/30 ${!isLive ? 'opacity-50 group-hover:opacity-80 transition-opacity' : ''}`}>
+          {initials(event.creator)}
+        </div>
+        {isLive && (
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-[2px] border-[#0a0a0f] shadow-[0_0_7px_rgba(244,63,94,0.9)]" />
+        )}
+      </div>
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+            className="min-w-0 flex-1 flex items-center justify-between gap-1">
+            <div className="min-w-0">
+              <p className={`text-[13px] font-medium truncate leading-tight group-hover:text-white ${isLive ? 'text-neutral-100' : 'text-neutral-400'}`}>
+                {event.creator}
+              </p>
+              <p className="text-[11px] text-neutral-600 truncate leading-tight">
+                {isLive ? event.category : (event.schedule || event.category)}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              {isLive ? (
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(event.viewers)}</span>
+                </div>
+              ) : (
+                <span className="text-[11px] text-neutral-600">Offline</span>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Link>
+  );
+}
+
+export default function LiveChannelsRail({ collapsed, onToggle }) {
+  const [showMoreFollowed, setShowMoreFollowed] = useState(false);
+  const [showMoreLive, setShowMoreLive] = useState(false);
+
+  const liveEvents = mockEvents.filter(e => e.isLive);
+  const visibleFollowed = showMoreFollowed ? FOLLOWED : FOLLOWED.slice(0, 4);
+  const visibleLive = showMoreLive ? liveEvents : liveEvents.slice(0, 5);
+
+  const catViewers = CATEGORIES.filter(c => c !== 'All').map(cat => ({
+    cat,
+    viewers: mockEvents.filter(e => e.category === cat && e.isLive).reduce((s, e) => s + e.viewers, 0),
+  })).sort((a, b) => b.viewers - a.viewers);
 
   return (
-    <aside className="hidden xl:block sticky top-[88px] self-start h-[calc(100vh-100px)]">
-      <div className="w-[240px] h-full flex flex-col rounded-2xl border border-white/10 glass-panel p-3 shadow-xl">
-        <div className="mb-3 flex items-center justify-between shrink-0">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">Live Channels</p>
-          <span className="text-[11px] text-rose-300 font-semibold">{liveEvents.length} ON</span>
-        </div>
+    <motion.aside
+      animate={{ width: collapsed ? 60 : 240 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className="hidden xl:flex flex-col fixed left-0 top-[72px] bottom-0 z-40 bg-[#0a0a0f] border-r border-white/8 overflow-hidden"
+    >
+      {/* ── Header ── */}
+      <div className={`flex items-center py-3 px-2 border-b border-white/5 flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        <AnimatePresence initial={false}>
+          {!collapsed && (
+            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="text-[13px] font-bold text-neutral-100 pl-1">For You</motion.span>
+          )}
+        </AnimatePresence>
+        <button onClick={onToggle}
+          className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-500 hover:text-white transition-colors flex-shrink-0"
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
+      </div>
 
-        <div className="space-y-1.5 overflow-y-auto flex-1 pr-2 scrollbar-hide pb-4">
-          {liveEvents.map((event) => (
-            <div key={event.id} className="rounded-lg px-2 py-2 hover:bg-white/5 transition-colors cursor-pointer group">
-              <p className="text-sm font-medium text-white truncate group-hover:text-amber-50">{event.creator}</p>
-              <p className="text-xs text-neutral-400 truncate mt-0.5">{event.title}</p>
-              <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-rose-400 font-semibold tracking-wide">
-                <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(243,24,63,0.8)]" />
-                <Eye className="h-3 w-3" />
-                {event.viewers.toLocaleString()}
-              </div>
-            </div>
-          ))}
+      {/* ── Scrollable body ── */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <div className="py-3 space-y-5">
+
+          {/* ── FOLLOWED CHANNELS ── */}
+          <section>
+            <SectionLabel label="Followed Channels" collapsed={collapsed}
+              rightEl={<button className="text-neutral-600 hover:text-neutral-300 transition-colors"><ArrowUpDown className="w-3 h-3" /></button>} />
+            {visibleFollowed.map(ev => (
+              <ChannelRow key={ev.id || ev.creator} event={ev} collapsed={collapsed} isLive={false} />
+            ))}
+            <ShowMore collapsed={collapsed} expanded={showMoreFollowed} onToggle={() => setShowMoreFollowed(v => !v)} count={FOLLOWED.length} threshold={4} />
+          </section>
+
+          {/* ── LIVE CHANNELS ── */}
+          <section>
+            <SectionLabel label="Live Channels" collapsed={collapsed}
+              rightEl={<span className="text-[10px] font-bold text-rose-400">{liveEvents.length} ON</span>} />
+            {visibleLive.map(ev => (
+              <ChannelRow key={ev.id} event={ev} collapsed={collapsed} isLive={true} />
+            ))}
+            <ShowMore collapsed={collapsed} expanded={showMoreLive} onToggle={() => setShowMoreLive(v => !v)} count={liveEvents.length} threshold={5} />
+          </section>
+
+          {/* ── RECOMMENDED CATEGORIES ── */}
+          <section>
+            <SectionLabel label="Recommended Categories" collapsed={collapsed} />
+            {catViewers.map(({ cat, viewers }) => (
+              <Link key={cat} to="/browse"
+                title={collapsed ? cat : undefined}
+                className={`flex items-center gap-2.5 py-1.5 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-1' : 'px-2'}`}>
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${CAT_COLORS[cat] || 'from-neutral-700 to-neutral-800'} flex-shrink-0 flex items-center justify-center shadow`}>
+                  <span className="text-[9px] font-extrabold text-white/90">{cat.slice(0, 2).toUpperCase()}</span>
+                </div>
+                <AnimatePresence initial={false}>
+                  {!collapsed && (
+                    <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+                      className="min-w-0 flex-1 flex items-center justify-between gap-1">
+                      <div>
+                        <p className="text-[13px] font-medium text-neutral-200 truncate group-hover:text-white">{cat}</p>
+                        <p className="text-[11px] text-neutral-600">{viewers > 0 ? 'Live now' : 'Browse'}</p>
+                      </div>
+                      {viewers > 0 && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                          <span className="text-[12px] text-neutral-300 tabular-nums font-semibold">{formatViewers(viewers)}</span>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Link>
+            ))}
+          </section>
+
+          {/* ── FOOTER LINKS ── */}
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="px-3 pt-2 pb-4 border-t border-white/5">
+                <div className="space-y-1 mt-2">
+                  {[
+                    { icon: <Compass className="w-3.5 h-3.5" />, label: 'Browse All', to: '/browse' },
+                    { icon: <Users className="w-3.5 h-3.5" />, label: 'Following', to: '/following' },
+                    { icon: <Settings className="w-3.5 h-3.5" />, label: 'Settings', to: '/' },
+                  ].map(({ icon, label, to }) => (
+                    <Link key={label} to={to}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-colors">
+                      {icon}
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+                <p className="mt-4 text-[10px] text-neutral-700 px-2">© 2026 StreamSphere</p>
+              </motion.section>
+            )}
+          </AnimatePresence>
+
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }

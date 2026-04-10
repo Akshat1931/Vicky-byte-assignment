@@ -58,20 +58,19 @@ html.light ::-webkit-scrollbar-thumb:hover {
 
 @layer utilities {
   .app-container {
-    max-width: var(--container-max);
-    margin-inline: auto;
+    width: 100%;
     padding-inline: 1rem;
   }
 
   @media (min-width: 640px) {
     .app-container {
-      padding-inline: 1.5rem;
+      padding-inline: 1.25rem;
     }
   }
 
   @media (min-width: 1024px) {
     .app-container {
-      padding-inline: 2rem;
+      padding-inline: 1.5rem;
     }
   }
 
