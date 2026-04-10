@@ -17,8 +17,8 @@ export default function StreamControls({ event }) {
     <section className="mt-4 rounded-2xl border border-white/10 glass-panel p-4 md:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.15em] text-indigo-300">Live Control</p>
-          <h2 className="mt-1 text-sm md:text-base font-semibold text-white">Broadcast Command Center</h2>
+          <p className="text-[11px] uppercase tracking-[0.15em] text-indigo-300">Viewing Preferences</p>
+          <h2 className="mt-1 text-sm md:text-base font-semibold text-white">Stream Settings</h2>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-neutral-300">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1">

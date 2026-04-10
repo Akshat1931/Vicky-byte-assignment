@@ -1,12 +1,24 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Share2, Heart, EllipsisVertical } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EventInfo({ event }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [floatingHearts, setFloatingHearts] = useState([]);
+
+  const handleLike = useCallback(() => {
+    setLiked(true);
+    const newHeart = { id: Date.now(), x: Math.random() * 30 - 15 };
+    setFloatingHearts((prev) => [...prev, newHeart]);
+
+    // Clean up heart after animation ends
+    setTimeout(() => {
+      setFloatingHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
+    }, 1200);
+  }, []);
 
   const likeCount = liked ? event.likes + 1 : event.likes;
 
@@ -66,15 +78,33 @@ export default function EventInfo({ event }) {
             Donate
           </motion.button>
           
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setLiked((v) => !v)}
-            className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
-          >
-            <Heart className={`w-4 h-4 ml-[-2px] ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
-            {likeCount.toLocaleString()}
-          </motion.button>
+          <div className="relative">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLike}
+              className="flex w-full items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
+            >
+              <Heart className={`w-4 h-4 ml-[-2px] ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
+              {likeCount.toLocaleString()}
+            </motion.button>
+
+            <AnimatePresence>
+              {floatingHearts.map((heart) => (
+                <motion.div
+                  key={heart.id}
+                  initial={{ opacity: 1, y: 0, x: heart.x, scale: 0.8 }}
+                  animate={{ opacity: 0, y: -120, x: heart.x + (Math.random() * 40 - 20), scale: 1.5 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                  className="absolute bottom-full mb-2 left-1/2 pointer-events-none z-50 text-rose-500"
+                  style={{ marginLeft: '-10px' }}
+                >
+                  <Heart className="fill-rose-500 w-5 h-5 drop-shadow-[0_0_12px_rgba(244,63,94,0.8)]" />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

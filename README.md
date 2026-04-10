@@ -1,152 +1,74 @@
-# Live Event Streaming Platform UI (VickyBytes Assignment)
+# VickyBytes Live Event Platform (StreamSphere)
 
-A frontend-only, responsive live event platform built with React and Tailwind CSS.
+**Live Deployment Link:** [https://your-vercel-deployment-link.vercel.app](https://your-vercel-deployment-link.vercel.app) *(Replace with your actual link before submitting!)*
 
-This project includes:
-- An event listing page with search/filter controls and interactive event cards
-- A cinematic hero section
-- An event streaming page with responsive video, event details, and simulated live chat
-- Smooth UI transitions and micro-interactions
+This project is a high-fidelity, highly responsive Single Page Application (SPA) built for the **Frontend Engineering Assignment — Live Event Platform**. It was developed strictly adhering to the "No Backend" and "No Shadcn UI" rules, utilizing custom components to bridge robust desktop broadcasting with adaptive mobile-first interactions.
 
-## Project Overview
+---
 
-This app is designed to simulate a real live-event experience without any backend APIs.
+## 🎯 Assignment Fulfillment & Core Features
 
-Core goals:
-- Production-style component structure
-- Clean and responsive UI across mobile/tablet/desktop
-- Lightweight interaction logic for likes, shares (UI), previews, and chat simulation
-- Readable and scalable frontend code
+### 🟢 PART 1 — Event Listing Page (Landing)
+- **Responsive Grid Layout**: Features a dynamic CSS grid that seamlessly adapts across Mobile, Tablet, and Desktop breakpoints. Populates exactly 20 rich event cards.
+- **Interactive Event Cards**: 
+  - Displays high-quality Event Images and Titles with text-clamping.
+  - Custom UI Toggles for **❤️ Like** and **🔗 Share** functions (with navigator clipboard integration).
+  - Hover-state **👁️‍🗨️ Watch Now (View)** buttons that route via React Router.
+  - Contextual Schedule Status logic (shows 'LIVE Viewers' or 'Upcoming Date/Time').
+- **Advanced Filtering**: Integrates a fully functional Search input and category pill-filter strip that instantly queries event states.
 
-## Tech Stack
+### 🔴 PART 2 — Event Streaming Page
+- **Dynamic Routing**: Fluid client-side navigation (`/event/:id`) passing local data sets.
+- **Responsive Video Player**: A containerized 16:9 iframe pulling remote Livestreams that intelligently scales while preserving aspect ratios.
+- **Interactive Live Chat UI**: 
+  - Complete with an input box and simulated localized message pushing.
+  - Integrates the requested **Bonus Auto-Scroll** functionality whenever new messages simulate.
+  - Desktop-optimized right-sidebar layout that seamlessly restacks below the video on Mobile viewports.
+- **Rich Description Layout**: Clean, nicely-spaced typography rendering the host profile, viewing preferences, and the core event description beneath the media.
 
-- React (Vite)
-- React Router
-- Tailwind CSS
-- Framer Motion
-- Lucide React Icons
+### 💡 Bonus Features & Differentiators
+- **Twitch-Style Theater Mode**: An engineered state-driven modifier that natively collapses the chat component and expands the video boundaries to 12-columns horizontally.
+- **Interactive Particle Physics**: High-frequency "Like" interactions trigger unique, floating heart particles with randomized trajectories mapped via `framer-motion` (mimicking TikTok LIVE behavior).
+- **Advanced Visual Processing**: Multi-layered Tailwind `backdrop-filter` utilities ensure clean glassmorphism, while LIVE broadcast indicators utilize tracking nested CSS (`animate-ping`) to simulate urgency.
 
-## Features Implemented
+---
 
-### Part 1 — Event Listing Page
-- Responsive grid layout with 15 event cards
-- Card includes:
-  - Event image
-  - Event title
-  - Like toggle button (UI)
-  - Share button (UI)
-  - View/Open Stream action
-  - Schedule/live status with viewer info
-- Search bar with basic filtering
-- Category filter chips
-- Live badges and preview snippets for selected events
+## 🛠️ Technology Stack
 
-### Part 2 — Event Streaming Page
-- Responsive video section
-- Live chat UI:
-  - Simulated incoming messages with random intervals
-  - Usernames + timestamps
-  - Auto-scroll behavior with scroll-position awareness
-  - Smooth message animations
-- Event description and creator info
+- **React 18** (Functional Hooks, Context)
+- **Vite** (Optimized build tooling)
+- **Tailwind CSS** (Utility-first responsive styling natively replacing component libraries)
+- **Framer Motion** (Declarative layout transitions & particle simulations)
+- **React Router DOM** (SPA history management)
+- **Lucide React** (Vector iconography)
 
-### UI/UX Enhancements
-- Cinematic scroll-driven hero section
-- Page transition animations
-- Responsive spacing and layout refinements
-- Reduced-motion handling and smoother mobile interaction intensity
+---
 
-## Folder Structure
+## 🚀 Setup & Installation Instructions
 
-```text
-src/
-  components/
-    Event/
-    Home/
-    Layout/
-  data/
-  pages/
-  App.jsx
-  main.jsx
-  index.css
-```
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-## Setup Instructions
+### Local Development
 
-### 1) Install dependencies
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd event-streaming-ui
+   ```
 
-```bash
-npm install
-```
+2. **Install core dependencies**:
+   ```bash
+   npm install
+   ```
 
-### 2) Run development server
+3. **Initialize the local development server**:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm run dev
-```
+4. **Access the application**: 
+   Navigate to `http://localhost:5173` via your preferred web browser.
 
-### 3) Build for production
-
-```bash
-npm run build
-```
-
-### 4) Preview production build
-
-```bash
-npm run preview
-```
-
-## Deployment
-
-Recommended: **Vercel**
-
-### Quick deploy steps
-1. Push this project to a public GitHub repository
-2. Import the repo in Vercel
-3. Framework preset: **Vite**
-4. Build command: `npm run build`
-5. Output directory: `dist`
-
-## Submission Checklist
-
-- [ ] Public GitHub repo
-- [ ] Deployed link (Vercel/Render/Railway)
-- [x] Responsive UI (mobile/tablet/desktop)
-- [x] Event listing page with interactive cards
-- [x] Event streaming page with chat simulation
-- [x] Clean component-based frontend architecture
-
-## Deployment Link
-
-Add your deployed URL here after deployment:
-
-`https://<your-deployment-url>`
-
-## Design Decisions
-
-- **Frontend-only simulation:** all live behaviors (chat, viewer shifts, controls) are mocked locally for fast UI iteration.
-- **Cinematic but usable hero:** scroll-driven hero is visually bold while event grid and stream page stay straightforward for usability.
-- **Component-first structure:** event listing, stream page, and shared layout are split into focused components for readability.
-- **Progressive enhancement:** advanced effects are layered on top of a stable baseline UI rather than requiring backend integration.
-
-## Performance Notes
-
-- Transform/opacity-first animations to reduce layout thrashing.
-- Randomized chat simulation runs via lightweight timed updates.
-- Card images use lazy-loading and async decoding.
-- Reduced-motion handling is included for better accessibility and smoother low-end behavior.
-
-## Screenshots / Demo
-
-Add screenshots or short GIF clips here before final submission:
-
-- `Hero parallax + event listing`
-- `Event detail stream + chat`
-- `Mobile responsive views`
-
-## Trade-offs
-
-- Chat, controls, and live metrics are simulated (no real-time backend).
-- Focus was placed on UI quality, responsiveness, and interaction realism over data persistence.
-- Hero animation is intentionally prominent to create a memorable first impression while keeping core page flows clean.
+### Production Fixes
+The deployment architecture utilizes a root-level `vercel.json` routing configuration to permanently resolve standard SPA `404 Not Found` errors upon hard refreshes across the deployment platform.

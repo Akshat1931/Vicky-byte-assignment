@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateChatMessage } from '../../data/mockChat';
-import { Send, Smile, Gift, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Smile, Gift, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function LiveChat() {
+export default function LiveChat({ onCollapse }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const [messages, setMessages] = useState([]);
@@ -126,6 +126,17 @@ export default function LiveChat() {
     >
       <div className={`p-3 sm:p-4 flex justify-between items-center gap-2 ${headerBar}`}>
         <h3 className={`font-bold flex items-center gap-2 text-sm sm:text-base min-w-0 ${headerTitle}`}>
+          {onCollapse && (
+            <button 
+              onClick={onCollapse}
+              className={`hidden lg:flex items-center justify-center p-1 rounded-md transition-colors ${
+                isLight ? 'hover:bg-slate-200 text-slate-500' : 'hover:bg-white/10 text-neutral-400'
+              }`}
+              title="Collapse Chat"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           Live Chat
         </h3>
         <div className="flex items-center gap-2 shrink-0">
