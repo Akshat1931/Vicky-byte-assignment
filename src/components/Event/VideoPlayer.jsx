@@ -1,9 +1,9 @@
-import { useState, useCallback, useContext } from 'react';
+import { useState, useCallback, useContext, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, Signal, Gauge, Radio, Sparkles, X, 
   Captions, Zap, PlayCircle, Theater, Smile, 
-  Flame, Laugh, Heart as HeartIcon, Star 
+  Flame, Laugh, Heart as HeartIcon, Star, Maximize 
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 
@@ -39,6 +39,19 @@ export default function VideoPlayer({ event, isPiPActive }) {
     setTimeout(() => setFloatingEmotes((prev) => prev.filter((e) => e.id !== newEmote.id)), 2000);
   }, []);
 
+  const containerRef = useRef(null);
+
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   // Sticky Overlay classes for mobile PiP mode - snap to ABSOLUTE TOP (top-0)
   const pipClasses = isPiPActive 
     ? `fixed top-0 left-0 w-full z-[130] rounded-none shadow-[0_15px_30px_rgba(0,0,0,0.6)] border-b transition-all duration-300 ${isDark ? 'border-white/10' : 'border-slate-200'}` 
@@ -46,6 +59,7 @@ export default function VideoPlayer({ event, isPiPActive }) {
 
   return (
     <motion.div
+      ref={containerRef}
       layout
       transition={{ type: "spring", stiffness: 350, damping: 35 }}
       className={`w-full relative bg-black overflow-hidden border transition-all duration-500 ${pipClasses} ${
@@ -61,15 +75,29 @@ export default function VideoPlayer({ event, isPiPActive }) {
         </div>
       )}
 
-      {/* ── Settings Gear ── */}
-      <div className={`absolute top-4 right-4 z-40 transition-opacity duration-300 ${isPiPActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      {/* ── Top-Right Utility Cluster ── */}
+      <div className="absolute top-4 right-4 z-40 flex items-center gap-2">
+        <div className={`flex items-center gap-2 transition-opacity duration-300 ${isPiPActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <button
+            onClick={() => { setSettingsOpen(v => !v); setEmoteMenuOpen(false); }}
+            className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border transition-all outline-none ${
+              settingsOpen ? 'text-indigo-500 border-indigo-400 scale-110 rotate-90' : 'text-white border-white/20 bg-black/40 hover:bg-black/60'
+            }`}
+            title="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Fullscreen Button - Always Visible or Prominent in PiP */}
         <button
-          onClick={() => { setSettingsOpen(v => !v); setEmoteMenuOpen(false); }}
-          className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border transition-all outline-none ${
-            settingsOpen ? 'text-indigo-500 border-indigo-400 scale-110 rotate-90' : 'text-white border-white/20 bg-black/40 hover:bg-black/60'
+          onClick={toggleFullscreen}
+          className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all outline-none hover:scale-110 active:scale-95 ${
+            isPiPActive ? 'ring-2 ring-indigo-500 shadow-lg shadow-indigo-500/20' : ''
           }`}
+          title="Full Screen"
         >
-          <Settings className="w-5 h-5" />
+          <Maximize className="w-5 h-5" />
         </button>
       </div>
 
