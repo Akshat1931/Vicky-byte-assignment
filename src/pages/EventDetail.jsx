@@ -8,14 +8,24 @@ import StreamProfilePanel from '../components/Event/StreamProfilePanel';
 import SuggestedEvents from '../components/Event/SuggestedEvents';
 import { MessageSquarePlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useStreaming } from '../context/StreamingContext';
 
 export default function EventDetail() {
   const { id } = useParams();
   const event = mockEvents.find((e) => e.id === id);
   const [chatCollapsed, setChatCollapsed] = useState(false);
   
+  const { setActiveStream } = useStreaming();
+  
   // New state for mobile sticky video overlay
   const [isPiPActive, setIsPiPActive] = useState(false);
+
+  // Set this as the active stream for the global PiP overlay
+  useEffect(() => {
+    if (event) {
+      setActiveStream(event);
+    }
+  }, [event, setActiveStream]);
 
   // Sync state with body class for global components (Navbar) to respond
   useEffect(() => {

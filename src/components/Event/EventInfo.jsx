@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Share2, Heart as HeartIcon, EllipsisVertical, X, Flag, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import HypeBurst from './HypeBurst';
 
 const AVATAR_COLORS = [
   'from-rose-500 to-pink-600', 'from-indigo-500 to-blue-600',
@@ -33,11 +34,17 @@ export default function EventInfo({ event }) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportStep, setReportStep] = useState('none'); // 'none', 'reasons', 'success'
+  const [showHype, setShowHype] = useState(false);
 
   // Toggle Like ONLY (Professional behavior)
   const handleLike = useCallback(() => {
-    setLiked(prev => !prev);
-  }, []);
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    if (nextLiked) {
+      setShowHype(true);
+      setTimeout(() => setShowHype(false), 800);
+    }
+  }, [liked]);
 
   const likeCount = liked ? event.likes + 1 : event.likes;
 
@@ -122,6 +129,7 @@ export default function EventInfo({ event }) {
           >
             <HeartIcon className={`w-3.5 h-3.5 sm:w-4 h-4 ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
             {likeCount.toLocaleString()}
+            <HypeBurst active={showHype} />
           </motion.button>
 
           {/* Share */}
@@ -203,8 +211,9 @@ export default function EventInfo({ event }) {
 
                   {reportStep === 'success' && (
                     <div className="text-center py-4 space-y-3">
-                      <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 mx-auto">
+                      <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 mx-auto relative">
                         <CheckCircle2 className="w-6 h-6 text-indigo-400" />
+                        <HypeBurst active={reportStep === 'success'} />
                       </div>
                       <div>
                         <p className={`font-black text-xs uppercase tracking-tight mb-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>Report Submitted</p>

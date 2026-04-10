@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Heart, Share2, Eye, Calendar, MoreVertical, X, Ban, Link2, RotateCcw, Flag, CheckCircle2 } from 'lucide-react';
 import { useStreaming } from '../../context/StreamingContext';
 import { useTheme } from '../../context/ThemeContext';
+import HypeBurst from '../Event/HypeBurst';
 
 const AVATAR_COLORS = [
   'from-rose-500 to-pink-600', 'from-indigo-500 to-blue-600',
@@ -48,6 +49,7 @@ export default function EventCard({ event }) {
   const [reportStep, setReportStep] = useState('none'); // 'none', 'reasons', 'success'
   const [imgError, setImgError] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [showHype, setShowHype] = useState(false);
   
   const menuRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
@@ -74,7 +76,15 @@ export default function EventCard({ event }) {
   const handleLike = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsLiked(v => { setLikeCount(c => v ? c - 1 : c + 1); return !v; });
+    setIsLiked(v => { 
+      const nextLiked = !v;
+      if (nextLiked) {
+        setShowHype(true);
+        setTimeout(() => setShowHype(false), 800);
+      }
+      setLikeCount(c => nextLiked ? c + 1 : c - 1); 
+      return nextLiked; 
+    });
   };
 
   const handleShare = async (e) => {
@@ -190,8 +200,9 @@ export default function EventCard({ event }) {
                   initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                   className="flex-1 flex flex-col items-center justify-center text-center space-y-3"
                 >
-                  <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                  <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 relative">
                     <CheckCircle2 className="w-6 h-6 text-indigo-400" />
+                    <HypeBurst active={reportStep === 'success'} />
                   </div>
                   <div>
                     <p className="text-white font-black text-sm mb-1 uppercase tracking-tight">Report Submitted</p>
@@ -240,7 +251,7 @@ export default function EventCard({ event }) {
               {/* Individual Like Button */}
               <button 
                 onClick={handleLike}
-                className={`flex items-center gap-1 px-1.5 py-1 rounded-lg transition-all ${
+                className={`flex items-center gap-1 px-1.5 py-1 rounded-lg transition-all relative ${
                   isLiked 
                     ? 'text-rose-500' 
                     : isLight ? 'text-slate-400 hover:text-rose-500 hover:bg-rose-50' : 'text-neutral-500 hover:text-rose-400 hover:bg-white/5'
@@ -248,6 +259,7 @@ export default function EventCard({ event }) {
               >
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500' : ''}`} />
                 <span className="text-[11px] font-black">{formatNum(likeCount)}</span>
+                <HypeBurst active={showHype} />
               </button>
 
               {/* Individual Share Button */}

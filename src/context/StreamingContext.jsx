@@ -5,6 +5,7 @@ const StreamingContext = createContext();
 export function StreamingProvider({ children }) {
   const [hiddenIds, setHiddenIds] = useState([]);
   const [undoData, setUndoData] = useState(null);
+  const [activeStream, setActiveStream] = useState(null);
 
   const hideEvent = useCallback((id) => {
     const stringId = String(id);
@@ -24,8 +25,10 @@ export function StreamingProvider({ children }) {
     hideEvent,
     restoreEvent,
     undoData,
-    setUndoData
-  }), [hiddenIds, hideEvent, restoreEvent, undoData]);
+    setUndoData,
+    activeStream,
+    setActiveStream
+  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream]);
 
   return (
     <StreamingContext.Provider value={value}>

@@ -3,28 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Maximize2, Play, Pause, Volume2 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useStreaming } from '../../context/StreamingContext';
 
 export default function PipOverlay() {
   const { theme } = useContext(ThemeContext);
+  const { activeStream, setActiveStream } = useStreaming();
   const location = useLocation();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   
-  // Example state - in a real app this would come from a global VideoContext
-  const [activeStream, setActiveStream] = useState({
-    id: 'live-1',
-    title: 'Global E-Sports 2026',
-    creator: 'ESL Network'
-  });
-
   const isLight = theme === 'light';
 
-  // Logic: Show PiP only when NOT on an event detail page
+  // Logic: Show PiP only when NOT on an event detail page AND a stream is active
   useEffect(() => {
     const isEventPage = location.pathname.startsWith('/event/');
-    // For demo purposes, we'll show it if the user has "navigated away" from a stream
-    // In a real implementation, this would trigger when a video is already playing
     if (!isEventPage && activeStream) {
       setIsVisible(true);
     } else {
@@ -32,7 +25,7 @@ export default function PipOverlay() {
     }
   }, [location.pathname, activeStream]);
 
-  if (!isVisible) return null;
+  if (!isVisible || !activeStream) return null;
 
   return (
     <AnimatePresence>
@@ -40,7 +33,7 @@ export default function PipOverlay() {
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.8, y: 20 }}
-        className="fixed bottom-6 right-6 z-[999] w-72 md:w-80 group"
+        className="fixed bottom-24 right-4 md:bottom-28 md:right-10 z-[999] w-64 md:w-80 group"
       >
         <div className={`overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ${
           isLight 
@@ -48,16 +41,18 @@ export default function PipOverlay() {
           : 'bg-[#0d0f14]/80 border-white/10 backdrop-blur-xl shadow-black/80'
         }`}>
           {/* Header / Controls */}
-          <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-gradient-to-b from-black/60 to-transparent">
+          <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20 bg-gradient-to-b from-black/60 to-transparent">
              <button 
-                onClick={() => setIsVisible(false)}
+                onClick={() => setActiveStream(null)}
                 className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-rose-500 transition-all"
+                title="Dismiss PiP"
              >
                 <X className="w-4 h-4" />
              </button>
              <button 
                 onClick={() => navigate(`/event/${activeStream.id}`)}
                 className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-indigo-500 transition-all"
+                title="Expand to Full View"
              >
                 <Maximize2 className="w-4 h-4" />
              </button>
@@ -66,8 +61,8 @@ export default function PipOverlay() {
           {/* Video / Thumbnail Area */}
           <div className="aspect-video relative bg-black flex items-center justify-center overflow-hidden">
              <img 
-               src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070" 
-               alt="Pip Preview"
+               src={activeStream.imageUrl || "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070"} 
+               alt={activeStream.title}
                className={`w-full h-full object-cover transition-all duration-500 ${isPaused ? 'grayscale' : ''}`}
              />
              
@@ -81,10 +76,12 @@ export default function PipOverlay() {
                 </div>
              </button>
 
-             {/* Live indicator */}
-             <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-rose-500 text-[8px] font-black text-white uppercase tracking-widest">
-                Live
-             </div>
+             {/* Live indicator if applicable */}
+             {activeStream.isLive && (
+               <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-rose-500 text-[8px] font-black text-white uppercase tracking-widest">
+                  Live
+               </div>
+             )}
           </div>
 
           {/* Info Area */}

@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Subscriptions from './pages/Subscriptions';
 import Settings from './pages/Settings';
+import PipOverlay from './components/Event/PipOverlay';
 
 // Media query hook — no SSR issues, no double renders
 function useIsXL() {
@@ -114,6 +115,7 @@ function App() {
             </motion.main>
 
             <ScrollToTopButton />
+            <PipOverlay />
             <UndoToast />
           </div>
         </BrowserRouter>
