@@ -18,16 +18,16 @@ export default function EventDetail() {
 
   return (
     <div className="app-container py-4 sm:py-6 lg:py-8 relative">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 transition-all duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 transition-all duration-500">
 
-        {/* ── Video ── Mobile: order 1 | Desktop: explicit col 1-8 (or full width) */}
+        {/* ── Video ── */}
         <div
           className={`
             order-1
             ${chatCollapsed
-              ? 'lg:col-start-1 lg:col-span-12'
-              : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
-            lg:row-start-1 min-w-0 relative transition-all duration-500
+              ? 'md:col-start-1 md:col-span-12'
+              : 'md:col-start-1 md:col-span-8 lg:col-span-8 xl:col-span-9'}
+            md:row-start-1 min-w-0 relative transition-all duration-500
           `}
         >
           <VideoPlayer event={event} />
@@ -47,15 +47,15 @@ export default function EventDetail() {
           </AnimatePresence>
         </div>
 
-        {/* ── Chat ── Mobile: order 2 (right after video) | Desktop: explicit col 9-12 */}
+        {/* ── Chat ── */}
         {!chatCollapsed && (
           <aside
             className={`
               order-2
-              lg:col-start-9 xl:col-start-10
-              lg:col-span-4 xl:col-span-3
-              lg:row-start-1 lg:row-span-2
-              min-w-0 self-start lg:sticky lg:top-20 xl:top-24 z-10 transition-all duration-500
+              md:col-start-9 xl:col-start-10
+              md:col-span-4 xl:col-span-3
+              md:row-start-1 md:row-span-2
+              min-w-0 self-start md:sticky md:top-20 xl:top-24 z-10 transition-all duration-500
             `}
           >
             <LiveChat onCollapse={() => setChatCollapsed(true)} />

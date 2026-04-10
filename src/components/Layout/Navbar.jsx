@@ -40,21 +40,29 @@ export default function Navbar({ theme, onToggleTheme }) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full glass-panel border-b border-white/5 transition-colors duration-300">
+    <nav className={`sticky top-0 z-[100] w-full border-b transition-colors duration-300 ${
+      theme === 'light' ? 'bg-white/80 backdrop-blur-md border-slate-200' : 'glass-panel border-white/5'
+    }`}>
       <div className="app-container">
         <div className="flex justify-between items-center min-h-[60px] sm:min-h-[64px] md:h-[72px] py-2 md:py-0">
           <div className="flex items-center gap-4 md:gap-6">
             <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-indigo-500/10 p-2 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+            <div className={`p-2 rounded-xl border transition-colors duration-300 ${
+              theme === 'light' ? 'bg-indigo-50 border-indigo-100 group-hover:bg-indigo-100' : 'bg-indigo-500/10 border-white/5 group-hover:bg-white/10'
+            }`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={theme === 'light' ? 'text-indigo-600' : 'text-white'}><polygon points="6 3 20 12 6 21 6 3" /></svg>
             </div>
-            <span className="font-bold text-lg md:text-xl tracking-tight text-white flex-shrink-0">Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
+            <span className={`font-bold text-lg md:text-xl tracking-tight flex-shrink-0 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Stream<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Sphere</span></span>
             </Link>
             <div className="hidden lg:flex items-center gap-2">
               <NavLink
                 to="/following"
                 className={({ isActive }) =>
-                  `rounded-full px-3 py-1.5 text-sm transition-colors ${isActive ? 'bg-white text-black' : 'text-neutral-300 hover:text-white hover:bg-white/10'}`
+                  `rounded-full px-3 py-1.5 text-sm transition-colors ${
+                    isActive 
+                    ? (theme === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-black') 
+                    : (theme === 'light' ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-neutral-300 hover:text-white hover:bg-white/10')
+                  }`
                 }
               >
                 Following
