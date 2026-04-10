@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Share2, Heart, EllipsisVertical } from 'lucide-react';
+import { Share2, Heart as HeartIcon, EllipsisVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EventInfo({ event }) {
@@ -7,17 +7,10 @@ export default function EventInfo({ event }) {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [floatingHearts, setFloatingHearts] = useState([]);
 
+  // Toggle Like ONLY (Professional behavior)
   const handleLike = useCallback(() => {
-    setLiked(true);
-    const newHeart = { id: Date.now(), x: Math.random() * 30 - 15 };
-    setFloatingHearts((prev) => [...prev, newHeart]);
-
-    // Clean up heart after animation ends
-    setTimeout(() => {
-      setFloatingHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
-    }, 1200);
+    setLiked(prev => !prev);
   }, []);
 
   const likeCount = liked ? event.likes + 1 : event.likes;
@@ -44,23 +37,23 @@ export default function EventInfo({ event }) {
       transition={{ delay: 0.3, duration: 0.8 }}
       className="mt-7 mb-10"
     >
-      <h1 className="text-3xl md:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">{event.title}</h1>
+      <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">{event.title}</h1>
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-7 border-b border-white/5 relative z-50">
         {/* Creator Info */}
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl ring-2 ring-white/10 shadow-lg">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/10 shadow-lg">
             {event.creator.charAt(0)}
           </div>
           <div>
-            <h3 className="text-white font-semibold text-lg leading-tight tracking-wide">{event.creator}</h3>
-            <p className="text-neutral-400 text-sm font-light">2.4M followers</p>
+            <h3 className="text-white font-semibold text-base md:text-lg leading-tight tracking-wide">{event.creator}</h3>
+            <p className="text-neutral-400 text-xs md:text-sm font-light">2.4M followers</p>
           </div>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsSubscribed((v) => !v)}
-            className={`ml-0 sm:ml-6 font-semibold text-sm px-5 py-2.5 rounded-full transition-colors duration-200 shadow-xl ${
+            className={`ml-2 sm:ml-6 font-semibold text-xs md:text-sm px-4 py-2 md:px-5 md:py-2.5 rounded-full transition-colors duration-200 shadow-xl ${
               isSubscribed ? 'bg-white/10 text-white border border-white/20 hover:bg-white/15' : 'bg-white text-black hover:bg-neutral-200'
             }`}
           >
@@ -70,92 +63,78 @@ export default function EventInfo({ event }) {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mt-4 sm:mt-0 relative w-full sm:w-auto">
+          {/* Donate */}
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-1.5 sm:gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm font-bold transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+            className="flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-[0_4px_12px_rgba(99,102,241,0.3)]"
           >
             Donate
           </motion.button>
           
-          <div className="relative">
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLike}
-              className="flex w-full items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
-            >
-              <Heart className={`w-4 h-4 ml-[-2px] ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
-              {likeCount.toLocaleString()}
-            </motion.button>
+          {/* Like Button (Toggle) */}
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLike}
+            className={`flex items-center gap-2 border px-4 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 shadow-lg ${
+              liked 
+                ? 'bg-rose-500/10 border-rose-500/40 text-rose-400' 
+                : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+            }`}
+          >
+            <HeartIcon className={`w-3.5 h-3.5 sm:w-4 h-4 ${liked ? 'fill-rose-500 text-rose-500' : ''}`} /> 
+            {likeCount.toLocaleString()}
+          </motion.button>
 
-            <AnimatePresence>
-              {floatingHearts.map((heart) => (
-                <motion.div
-                  key={heart.id}
-                  initial={{ opacity: 1, y: 0, x: heart.x, scale: 0.8 }}
-                  animate={{ opacity: 0, y: -120, x: heart.x + (Math.random() * 40 - 20), scale: 1.5 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 1.2, ease: "easeOut" }}
-                  className="absolute bottom-full mb-2 left-1/2 pointer-events-none z-50 text-rose-500"
-                  style={{ marginLeft: '-10px' }}
-                >
-                  <Heart className="fill-rose-500 w-5 h-5 drop-shadow-[0_0_12px_rgba(244,63,94,0.8)]" />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+          {/* Share */}
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShare}
-            className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg"
+            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all shadow-lg"
           >
-            <Share2 className="w-4 h-4 ml-[-2px]" /> 
-            {copied ? 'Copied' : 'Share'}
+            <Share2 className="w-3.5 h-3.5 sm:w-4 h-4" /> 
+            <span className="hidden xs:block">{copied ? 'Copied' : 'Share'}</span>
           </motion.button>
+
+          {/* More Menu */}
           <div className="relative isolate ml-auto sm:ml-0">
             <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setMenuOpen((v) => !v)}
-            className="w-[36px] h-[36px] sm:w-10 sm:h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full transition-colors duration-200 flex-shrink-0 shadow-lg"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full transition-all shadow-lg"
             >
               <EllipsisVertical className="w-4 h-4" />
             </motion.button>
-            {menuOpen && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute right-0 top-full mt-2 w-40 rounded-lg border border-white/10 bg-[#090b12] p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-[100]"
-              >
-                <button 
-                  onClick={() => setMenuOpen(false)}
-                  className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5"
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-white/10 bg-[#0d0f14]/95 backdrop-blur-xl p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-[200]"
                 >
-                  Report stream
-                </button>
-                <button 
-                  onClick={() => setMenuOpen(false)}
-                  className="w-full rounded-md px-2 py-2 text-left text-sm text-neutral-100 hover:bg-white/5"
-                >
-                  Save for later
-                </button>
-              </motion.div>
-            )}
+                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-rose-400 hover:bg-white/5 transition-colors">Report stream</button>
+                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-100 hover:bg-white/5 transition-colors">Save for later</button>
+                  <button onClick={() => setMenuOpen(false)} className="w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-100 hover:bg-white/5 transition-colors">Not interested</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
+      {/* Stats & Description */}
       <div className="mt-7 glass-panel rounded-2xl p-5 md:p-7 relative z-10">
-        <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-neutral-400 mb-6 tracking-wide">
+        <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-medium text-neutral-400 mb-6 tracking-wide">
           <span className="text-white">{event.viewers.toLocaleString()} views</span>
           <span className="w-1 h-1 bg-white/20 rounded-full" />
           <span>Premiered {event.schedule}</span>
           <span className="text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer ml-auto">#{event.category}</span>
         </div>
-        <p className="text-neutral-300 leading-relaxed whitespace-pre-wrap font-light text-sm md:text-[15px]">
+        <p className="text-neutral-300 leading-relaxed whitespace-pre-wrap font-light text-sm md:text-base">
           {event.description}
           <br /><br />
           Join {event.creator} in this exclusive live broadcast! Don't forget to like and subscribe for more amazing content to never miss another drop.
