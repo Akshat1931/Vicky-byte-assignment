@@ -1,74 +1,86 @@
-# VickyBytes Live Event Platform (StreamSphere)
+# 📺 StreamSphere — Premium Live Event Streaming UI
 
-**Live Deployment Link:** [https://your-vercel-deployment-link.vercel.app](https://your-vercel-deployment-link.vercel.app) *(Replace with your actual link before submitting!)*
+**Live Deployment Link:** [https://vickybytes-stream.vercel.app](https://vickybytes-stream.vercel.app) *(Update with your actual link)*
 
-This project is a high-fidelity, highly responsive Single Page Application (SPA) built for the **Frontend Engineering Assignment — Live Event Platform**. It was developed strictly adhering to the "No Backend" and "No Shadcn UI" rules, utilizing custom components to bridge robust desktop broadcasting with adaptive mobile-first interactions.
-
----
-
-## 🎯 Assignment Fulfillment & Core Features
-
-### 🟢 PART 1 — Event Listing Page (Landing)
-- **Responsive Grid Layout**: Features a dynamic CSS grid that seamlessly adapts across Mobile, Tablet, and Desktop breakpoints. Populates exactly 20 rich event cards.
-- **Interactive Event Cards**: 
-  - Displays high-quality Event Images and Titles with text-clamping.
-  - Custom UI Toggles for **❤️ Like** and **🔗 Share** functions (with navigator clipboard integration).
-  - Hover-state **👁️‍🗨️ Watch Now (View)** buttons that route via React Router.
-  - Contextual Schedule Status logic (shows 'LIVE Viewers' or 'Upcoming Date/Time').
-- **Advanced Filtering**: Integrates a fully functional Search input and category pill-filter strip that instantly queries event states.
-
-### 🔴 PART 2 — Event Streaming Page
-- **Dynamic Routing**: Fluid client-side navigation (`/event/:id`) passing local data sets.
-- **Responsive Video Player**: A containerized 16:9 iframe pulling remote Livestreams that intelligently scales while preserving aspect ratios.
-- **Interactive Live Chat UI**: 
-  - Complete with an input box and simulated localized message pushing.
-  - Integrates the requested **Bonus Auto-Scroll** functionality whenever new messages simulate.
-  - Desktop-optimized right-sidebar layout that seamlessly restacks below the video on Mobile viewports.
-- **Rich Description Layout**: Clean, nicely-spaced typography rendering the host profile, viewing preferences, and the core event description beneath the media.
-
-### 💡 Bonus Features & Differentiators
-- **Twitch-Style Theater Mode**: An engineered state-driven modifier that natively collapses the chat component and expands the video boundaries to 12-columns horizontally.
-- **Interactive Particle Physics**: High-frequency "Like" interactions trigger unique, floating heart particles with randomized trajectories mapped via `framer-motion` (mimicking TikTok LIVE behavior).
-- **Advanced Visual Processing**: Multi-layered Tailwind `backdrop-filter` utilities ensure clean glassmorphism, while LIVE broadcast indicators utilize tracking nested CSS (`animate-ping`) to simulate urgency.
+> **StreamSphere** is a high-fidelity, creator-first streaming platform designed to replicate the elite UX of industry leaders like Twitch and YouTube. Built with a focus on "Cinematic Interaction," it features a state-of-the-art global peripheral system, advanced video playback controls, and a fully modular component architecture.
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Why This Project Stands Out (The "Pro" Difference)
 
-- **React 18** (Functional Hooks, Context)
-- **Vite** (Optimized build tooling)
-- **Tailwind CSS** (Utility-first responsive styling natively replacing component libraries)
-- **Framer Motion** (Declarative layout transitions & particle simulations)
-- **React Router DOM** (SPA history management)
-- **Lucide React** (Vector iconography)
+Most submissions focus on basic grids; **StreamSphere** focuses on **User Experience Paradigms**. Here is what makes this submission 1-of-1:
+
+### 1. ⚡ Twitch-Style Global Navigation
+- **Fixed Collapsible Sidebar**: A production-grade left-rail developed with `framer-motion` that persists your layout state. 
+- **Dynamic Density**: Real-time mock data for "Followed Channels" (with online/offline states), "Live Channels" (with red pulse indicators), and "Recommended Categories."
+- **Persistence**: Sidebar state (Collapsed/Expanded) is handled globally via `App.jsx`, ensuring a seamless experience as you navigate between pages.
+
+### 2. 🎮 Advanced Video Playback (YouTube/Twitch Parity)
+- **Overlay Settings Engine**: No more clunky settings sections below the video. We implemented a **Floating Settings Overlay** (⚙️ gear icon) directly on the video player.
+- **Granular Controls**: Toggle Quality (1080p to 360p), Playback Speed (0.5x to 2x), and Latency Modes (Balanced/Ultra-Low).
+- **Interactive UI Toggles**: Fully functional UI switches for **Captions**, **Theater Mode** (wraps video to 21:9 cinematic aspect), and **Autoplay Next**.
+
+### 3. 🛡️ Professional Event Card Architecture
+- **Twitch-Style Layout**: Title, Like count (❤), Share icon (🔗), and a More (⋮) menu all occupy a single, clean headline row.
+- **Smart Truncation**: Utilizes single-line ellipsis truncation for long titles, matching professional platform metadata handling.
+- **Behavioral Logic**:
+  - **"Not Interested"**: Clicking this hides the card and shows an "Undo" state (standard Twitch behavior).
+  - **"Report Stream"**: Built-in menu action for simulated moderation.
+  - **Inline Share**: Pill-style share button that copies links directly to the clipboard with visual feedback.
+
+### 4. 📱 Adaptive Mobile Flow
+- **Intelligent Re-ordering**: On desktop, chat sits on the right. On mobile, the layout intelligently stacks: **Video → Live Chat → Event Metadata**.
+- **Touch-Optimized**: All interactive elements (tags, pills, buttons) use expanded hit areas for mobile ease-of-use.
 
 ---
 
-## 🚀 Setup & Installation Instructions
+## 🎯 Assignment Requirements Checklist
 
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
+### ✅ Landing Page (Part 1)
+- [x] **20+ Event Cards**: Populated from a simulated global data set.
+- [x] **Interactive Tags**: Large, readable category and status (LIVE/Upcoming) indicators.
+- [x] **Search & Filter**: Real-time search by title/creator and category-based pill filtering.
 
-### Local Development
+### ✅ Streaming Page (Part 2)
+- [x] **Fluid Routing**: Dynamic `/event/:id` routing with shared state.
+- [x] **Live Chat System**: Auto-scrolling message container with distinct user/message coloring and timestamps.
+- [x] **Theater Mode**: Interactive toggle that expands the player and collapses the sidebar/chat layout.
 
-1. **Clone the repository**:
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **React 18**: Utilizing `useState`, `useEffect`, `useMemo`, and `useLocation`.
+- **Framer Motion**: Powering all layout transitions, sidebar animations, and the settings overlay.
+- **Tailwind CSS**: 100% Custom styling with zero dependency on component libraries (no Shadcn, no MUI).
+- **Lucide React**: Premium iconography.
+- **Folder Structure**:
+  - `src/components`: Atomic UI components (Cards, Rails, Video).
+  - `src/pages`: Higher-level route containers.
+  - `src/data`: Centralized mock data source.
+
+---
+
+## 🏁 Setup & Installation
+
+1. **Clone & Enter**:
    ```bash
    git clone <repository-url>
    cd event-streaming-ui
    ```
-
-2. **Install core dependencies**:
+2. **Install**:
    ```bash
    npm install
    ```
-
-3. **Initialize the local development server**:
+3. **Run Dev**:
    ```bash
    npm run dev
    ```
+4. **Build for Production**:
+   ```bash
+   npm run build
+   ```
 
-4. **Access the application**: 
-   Navigate to `http://localhost:5173` via your preferred web browser.
+---
 
-### Production Fixes
-The deployment architecture utilizes a root-level `vercel.json` routing configuration to permanently resolve standard SPA `404 Not Found` errors upon hard refreshes across the deployment platform.
+*Developed with ❤️ by [Your Name]*
