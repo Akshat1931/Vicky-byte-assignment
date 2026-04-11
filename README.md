@@ -10,9 +10,13 @@ StreamSphere is a high-fidelity frontend execution of a modern live-streaming pl
 
 ## 📸 Production Showreels
 
+## 📸 Production Showreels
+
+> 🎥 Click the preview to watch the demo
+
 | 🎬 Cinematic Hero | 🔍 Discovery HUD |
 | :--- | :--- |
-| <video src="./hero_reel.mp4" width="100%" controls muted loop></video> | <video src="./search_reel.mp4" width="100%" controls muted loop></video> |
+| [![Hero Demo](https://img.youtube.com/vi/gUkWF61638w/maxresdefault.jpg)](https://www.youtube.com/watch?v=gUkWF61638w) | [![Search Demo](https://img.youtube.com/vi/f2GuTEVaUas/maxresdefault.jpg)](https://www.youtube.com/watch?v=f2GuTEVaUas) |
 | **Experience the Scroll** | **Reactive Search & Filters** |
 
 | 💬 Community Lounge | 📺 Content Continuity |
