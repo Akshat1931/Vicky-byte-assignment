@@ -10,8 +10,6 @@ StreamSphere is a high-fidelity frontend execution of a modern live-streaming pl
 
 ## 📸 Production Showreels
 
-## 📸 Production Showreels
-
 > 🎥 Click the preview to watch the demo
 
 | 🎬 Cinematic Hero | 🔍 Discovery HUD |
@@ -23,6 +21,11 @@ StreamSphere is a high-fidelity frontend execution of a modern live-streaming pl
 | :--- | :--- |
 | [![Chat Demo](https://img.youtube.com/vi/dvr-cXaOn8A/maxresdefault.jpg)](https://www.youtube.com/watch?v=dvr-cXaOn8A) | [![PiP Demo](https://img.youtube.com/vi/abT9glVJmtg/maxresdefault.jpg)](https://www.youtube.com/watch?v=abT9glVJmtg) |
 | **Real-time Chat Interaction** | **Global Picture-in-Picture (PiP)** |
+
+| ⚡ UX Interactions |  |
+| :--- | :--- |
+| [![UX Demo](https://img.youtube.com/vi/-nzy7jDVH0o/maxresdefault.jpg)](https://www.youtube.com/watch?v=-nzy7jDVH0o) |  |
+| **Undo, Remove & Report Actions** |  |
 
 ---
 
