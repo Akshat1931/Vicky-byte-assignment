@@ -9,6 +9,9 @@ import {
 import { ThemeContext } from '../../context/ThemeContext';
 import { useStreaming } from '../../context/StreamingContext';
 
+import { useNavigate } from 'react-router-dom';
+import { mockEvents } from '../../data/mockEvents';
+
 const QUALITY_OPTIONS = ['Auto', '1080p', '720p', '480p', '360p'];
 const SPEED_OPTIONS = ['0.5x', '0.75x', '1x', '1.25x', '1.5x', '2x'];
 const LATENCY_OPTIONS = ['Low Latency', 'Balanced', 'Ultra Low'];
@@ -22,9 +25,12 @@ const EMOTES = [
 
 export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheaterMode }) {
    const { theme } = useContext(ThemeContext);
+   const navigate = useNavigate();
    const isDark = theme === 'dark';
    const videoRef = useRef(null);
    const lastSyncedTime = useRef(0);
+   const autoPlayTimerRef = useRef(null);
+
    const { 
       activeStream, setActiveStream, 
       volume, setGlobalVolume, 
@@ -37,6 +43,11 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
    const [duration, setDuration] = useState(0);
    const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
 
+   // AutoPlay Next State
+   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+   const [autoPlayCountdown, setAutoPlayCountdown] = useState(5);
+   const [nextEvent, setNextEvent] = useState(null);
+
    // HUD Overlay State
    const [hud, setHud] = useState({ type: null, value: null, visible: false });
 
@@ -46,7 +57,7 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
    const [speed, setSpeed] = useState('1x');
    const [latency, setLatency] = useState('Balanced');
    const [captions, setCaptions] = useState(false);
-   const [autoplay, setAutoplay] = useState(true);
+   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
    const [floatingEmotes, setFloatingEmotes] = useState([]);
    const [playPauseHUD, setPlayPauseHUD] = useState({ visible: false, type: 'play' });
    const [isVolumeDragging, setIsVolumeDragging] = useState(false);
@@ -124,6 +135,64 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
          }
       }
    }, [duration, activeStream?.timestamp, event.id, performSecureSeek]);
+
+   // Autoplay Timer Cleanup
+   useEffect(() => {
+      return () => {
+         if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+      };
+   }, []);
+
+   const findNextEvent = useCallback(() => {
+      // Find events in the same category
+      const sameCategory = mockEvents.filter(e => e.category === event.category && e.id !== event.id);
+      
+      // Prioritize LIVE events
+      const liveNext = sameCategory.filter(e => e.isLive)[0];
+      if (liveNext) return liveNext;
+      
+      // Secondary: Any event in same category
+      if (sameCategory[0]) return sameCategory[0];
+      
+      // Fallback: Just the next event in mockEvents
+      const currentIdx = mockEvents.findIndex(e => e.id === event.id);
+      return mockEvents[(currentIdx + 1) % mockEvents.length];
+   }, [event.category, event.id]);
+
+   const handleVideoEnd = () => {
+      if (!autoplayEnabled) return;
+      
+      const next = findNextEvent();
+      setNextEvent(next);
+      setIsAutoPlaying(true);
+      setAutoPlayCountdown(5);
+      
+      // Start Countdown
+      autoPlayTimerRef.current = setInterval(() => {
+         setAutoPlayCountdown(prev => {
+            if (prev <= 1) {
+               clearInterval(autoPlayTimerRef.current);
+               executeAutoPlay(next);
+               return 0;
+            }
+            return prev - 1;
+         });
+      }, 1000);
+   };
+
+   const executeAutoPlay = (targetEvent) => {
+      setIsAutoPlaying(false);
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+      
+      // Smooth Transition
+      setActiveStream({ ...targetEvent, timestamp: 0 });
+      navigate(`/event/${targetEvent.id}`);
+   };
+
+   const cancelAutoPlay = () => {
+      setIsAutoPlaying(false);
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+   };
 
    const handleManualPlay = () => {
       if (videoRef.current) {
@@ -393,9 +462,77 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
             )}
          </AnimatePresence>
 
+         {/* ── AutoPlay Next Overlay (YouTube-Style) ── */}
+         <AnimatePresence>
+            {isAutoPlaying && nextEvent && (
+               <motion.div 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-[80] flex items-center justify-center p-6"
+               >
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-3xl" />
+                  
+                  <motion.div 
+                     initial={{ scale: 0.9, y: 20 }}
+                     animate={{ scale: 1, y: 0 }}
+                     className={`relative max-w-sm w-full p-6 rounded-3xl border shadow-2xl space-y-6 ${
+                        isDark ? 'bg-black/40 border-white/10' : 'bg-white/90 border-slate-200'
+                     }`}
+                  >
+                     <div className="space-y-2 text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Up Next</p>
+                        <h3 className="text-xl font-bold text-white line-clamp-1">{nextEvent.title}</h3>
+                        <p className="text-xs text-neutral-400 font-medium">by {nextEvent.creator}</p>
+                     </div>
+
+                     <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl group">
+                        <img src={nextEvent.imageUrl} alt={nextEvent.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                           <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                              {/* Countdown Ring */}
+                              <svg className="absolute inset-0 w-full h-full -rotate-90">
+                                 <circle 
+                                    cx="50%" cy="50%" r="45%" 
+                                    className="stroke-white/10 fill-none" 
+                                    strokeWidth="4" 
+                                 />
+                                 <motion.circle 
+                                    cx="50%" cy="50%" r="45%" 
+                                    className="stroke-indigo-500 fill-none" 
+                                    strokeWidth="4"
+                                    strokeDasharray="100 100"
+                                    animate={{ strokeDashoffset: (autoPlayCountdown / 5) * 100 }}
+                                    transition={{ duration: 1, ease: "linear" }}
+                                 />
+                              </svg>
+                              <span className="text-2xl sm:text-3xl font-black text-white">{autoPlayCountdown}</span>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="flex flex-col gap-3">
+                        <button 
+                           onClick={() => executeAutoPlay(nextEvent)}
+                           className="w-full py-3 rounded-xl bg-white text-black font-black text-xs hover:scale-[1.02] transition-transform shadow-xl active:scale-95"
+                        >
+                           PLAY NOW
+                        </button>
+                        <button 
+                           onClick={cancelAutoPlay}
+                           className="w-full py-3 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20 transition-all active:scale-95"
+                        >
+                           CANCEL
+                        </button>
+                     </div>
+                  </motion.div>
+               </motion.div>
+            )}
+         </AnimatePresence>
+
          {/* ── Autoplay Blocked Overlay (RESTORED) ── */}
          <AnimatePresence>
-            {isAutoplayBlocked && (
+            {isAutoplayBlocked && !isAutoPlaying && (
                <motion.div 
                   key="autoplay-blocked"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -522,6 +659,7 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
                   setActiveStream({ ...event, timestamp: videoRef.current.currentTime });
                }
             }}
+            onEnded={handleVideoEnd}
          >
             <source src={event.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4'} type="video/mp4" />
          </video>
