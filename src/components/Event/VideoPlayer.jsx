@@ -536,11 +536,11 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
                            {[
                               { label: 'Captions', icon: <Captions className="w-4 h-4" />, val: captions, toggle: () => setCaptions(v => !v) },
                               { label: 'Theater Mode', icon: <Theater className="w-4 h-4" />, val: theaterMode, toggle: () => setTheaterMode(v => !v) },
-                              { label: 'Autoplay Next', icon: <PlayCircle className="w-4 h-4" />, val: autoplay, toggle: () => setAutoplay(v => !v) },
+                              { label: 'Autoplay Next', icon: <PlayCircle className="w-4 h-4" />, val: autoplayEnabled, toggle: () => setAutoplayEnabled(v => !v) },
                            ].map((item) => (
                               <button key={item.label} onClick={item.toggle} className="w-full flex items-center justify-between py-2 group outline-none">
                                  <span className={`flex items-center gap-3 text-[12px] font-semibold transition-colors ${
-                                    isDark ? 'text-neutral-400 group-hover:text-white' : 'text-slate-500 group-hover:text-slate-900'
+                                    isDark ? 'text-neutral-400 group-hover:text-white' : 'text-slate-700 group-hover:text-slate-900'
                                  }`}>
                                     <span className={item.val ? 'text-indigo-500' : ''}>{item.icon}</span> {item.label}
                                  </span>
