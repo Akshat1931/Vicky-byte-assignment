@@ -80,6 +80,7 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
 
    const handleManualPlay = () => {
       if (videoRef.current) {
+         videoRef.current.muted = false; // Restore old unmute approach
          videoRef.current.play();
          setIsPlaying(true);
          setIsAutoplayBlocked(false);
@@ -160,7 +161,13 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
          transition={{ type: "spring", stiffness: 350, damping: 35 }}
          onClick={(e) => {
             const isControl = e.target.closest('button') || e.target.closest('input');
-            if (!isControl) togglePlay();
+            if (isControl) return;
+
+            if (isAutoplayBlocked) {
+               handleManualPlay();
+            } else {
+               togglePlay();
+            }
          }}
          className={`w-full relative bg-black overflow-hidden border transition-all duration-500 cursor-pointer group/player ${pipClasses} ${
             theme === 'light' ? 'border-slate-200' : 'border-white/10'

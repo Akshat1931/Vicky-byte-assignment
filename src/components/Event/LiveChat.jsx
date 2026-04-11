@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateChatMessage } from '../../data/mockChat';
-import { Send, Smile, Gift, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Send, Smile, Gift, ChevronDown, ChevronUp, X, Shield, Gem, Star, CheckCircle2, Crown, Flame, Zap, TrendingUp, Bell } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -164,14 +164,96 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
       >
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
-            <motion.div key={msg.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="text-sm">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className={`font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>{msg.user}</span>
-                <span className="text-[10px] text-neutral-500">{msg.timestamp}</span>
-              </div>
-              <span className={isLight ? 'text-slate-600' : 'text-neutral-100/90'}>{msg.message}</span>
+            <motion.div 
+              key={msg.id} 
+              initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+              animate={{ opacity: 1, y: 0, scale: 1 }} 
+              className="flex flex-col gap-1 w-full"
+            >
+              {msg.isDonation ? (
+                <div className="rounded-xl overflow-hidden border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.15)] mb-2">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white uppercase">{msg.user[0]}</div>
+                      <span className="font-black text-white text-xs">{msg.user}</span>
+                    </div>
+                    <span className="font-black text-white text-xs shadow-sm">${msg.amount}</span>
+                  </div>
+                  <div className={`p-3 text-xs font-medium leading-relaxed ${
+                    isLight ? 'bg-amber-100 text-amber-950' : 'bg-amber-500/10 text-amber-200/90 backdrop-blur-sm'
+                  }`}>
+                    {msg.message}
+                  </div>
+                </div>
+              ) : (
+                <div className={`group relative p-2 rounded-xl transition-all border ${
+                  msg.message.includes('@You') 
+                    ? 'bg-indigo-500/10 border-indigo-500/40 shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]' 
+                    : isLight 
+                      ? 'bg-slate-50/50 border-slate-200' 
+                      : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                } ${
+                  msg.role === 'mod' ? 'border-emerald-500/20 bg-emerald-500/5' :
+                  msg.role === 'vip' ? 'border-indigo-500/20 bg-indigo-500/5' :
+                  msg.role === 'founder' ? 'border-amber-500/30 bg-amber-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]' :
+                  msg.role === 'top_fan' ? 'border-orange-500/20 bg-orange-500/5' :
+                  msg.role === 'sub' ? 'border-sky-500/20 bg-sky-500/5' : ''
+                }`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {msg.role === 'founder' && <Crown className="w-3 h-3 text-amber-400 shrink-0 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" />}
+                      {msg.role === 'mod' && <Shield className="w-3 h-3 text-emerald-400 shrink-0" />}
+                      {msg.role === 'vip' && <Gem className="w-3 h-3 text-indigo-400 shrink-0" />}
+                      {msg.role === 'top_fan' && <Flame className="w-3 h-3 text-orange-500 shrink-0" />}
+                      {msg.role === 'sub' && <Star className="w-3 h-3 text-sky-400 shrink-0" />}
+                      
+                      <span className={`font-bold text-[13px] truncate ${
+                        msg.role === 'founder' ? 'text-amber-400' :
+                        msg.role === 'mod' ? 'text-emerald-400' :
+                        msg.role === 'vip' ? 'text-indigo-400' :
+                        msg.role === 'top_fan' ? 'text-orange-500' :
+                        msg.role === 'sub' ? 'text-sky-400' :
+                        isLight ? 'text-slate-700' : 'text-neutral-300'
+                      }`}>
+                        {msg.user}
+                      </span>
+                      {msg.isVerified && <CheckCircle2 className="w-3 h-3 text-indigo-500 shrink-0" />}
+                    </div>
+                    <span className="text-[9px] text-neutral-500 ml-auto shrink-0">{msg.timestamp}</span>
+                  </div>
+                  <p className={`text-[13px] leading-relaxed break-words ${
+                    msg.message.includes('@You') ? 'text-indigo-200 font-medium' :
+                    isLight ? 'text-slate-600' : 'text-neutral-300/90'
+                  }`}>
+                    {msg.message.split('@You').map((part, i, arr) => (
+                      <span key={i}>
+                        {part}
+                        {i < arr.length - 1 && <span className="bg-indigo-500/30 text-indigo-300 px-1 rounded font-bold">@You</span>}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              )}
             </motion.div>
           ))}
+        </AnimatePresence>
+
+        {/* Scroll Toast Button */}
+        <AnimatePresence>
+          {!isPinnedToBottom && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+              className="sticky bottom-4 left-0 right-0 flex justify-center z-50 pointer-events-none"
+            >
+              <button 
+                onClick={scrollToBottom}
+                className="pointer-events-auto bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-4 py-2 rounded-full shadow-[0_8px_30px_rgba(99,102,241,0.4)] flex items-center gap-2 transition-all border border-indigo-400/30"
+              >
+                <ChevronDown className="w-3 h-3" />
+                NEW MESSAGES
+              </button>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 

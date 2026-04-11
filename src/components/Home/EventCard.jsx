@@ -109,16 +109,20 @@ export default function EventCard({ event }) {
   };
 
   return (
-    <div className="group flex flex-col relative">
-      {/* Thumbnail Area */}
-      <div className="relative aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-white/5 border border-white/5 shadow-2xl">
+    <motion.div 
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="group flex flex-col relative"
+    >
+      <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#0a0a0f] border border-white/5 shadow-2xl group-hover:shadow-indigo-500/10 transition-shadow duration-500">
         <Link to={`/event/${event.id}`} className="block w-full h-full">
           {!imgError ? (
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.15, rotate: 1 }}
               src={event.imageUrl} 
               alt={event.title}
               onError={() => setImgError(true)}
-              className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ${reportStep !== 'none' ? 'blur-md' : ''}`}
+              className={`w-full h-full object-cover transition-all duration-700 ${reportStep !== 'none' ? 'blur-md' : ''}`}
             />
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${avatarColor(event.category)} flex items-center justify-center opacity-60`}>
@@ -126,42 +130,38 @@ export default function EventCard({ event }) {
             </div>
           )}
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+          {/* Elite HUD Overlay - Top Side */}
+          <div className="absolute top-3 left-3 right-3 z-30 flex items-start justify-between pointer-events-none">
+            <div className="flex flex-col gap-2">
+              {event.isLive ? (
+                <div className="flex items-center gap-1.5 bg-rose-600/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-lg shadow-lg border border-white/20">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_white]" /> LIVE
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 bg-indigo-600/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-lg shadow-lg border border-white/20">
+                  <Calendar className="w-3 h-3" /> Scheduled
+                </div>
+              )}
+            </div>
 
-          {/* Premium Badges */}
-          <div className="absolute top-2.5 left-2.5 z-30 flex flex-col gap-2">
-            {event.isLive ? (
-              <span className="flex items-center gap-1.5 bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl shadow-rose-600/40 border border-white/20">
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl shadow-indigo-600/40 border border-white/20">
-                <Calendar className="w-3 h-3" /> Upcoming
-              </span>
+            {/* Viewer Count Glass HUD */}
+            {event.isLive && (
+              <div className="bg-black/40 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl flex items-center gap-2">
+                <Eye className="w-3 h-3 text-indigo-400" />
+                <span className="text-[10px] font-black text-white">{formatNum(event.viewers)}</span>
+              </div>
             )}
           </div>
 
-          {/* Status info - Bottom Left */}
-          <div className="absolute bottom-3 left-3 text-white z-20">
-             <div className="flex flex-col">
-                <p className="text-[10px] font-black uppercase tracking-wider opacity-60 mb-0.5">
-                   {event.isLive ? 'Viewers' : 'Schedule'}
-                </p>
-                <p className="text-xs font-bold leading-none">
-                   {event.isLive ? formatNum(event.viewers) : event.schedule}
-                </p>
+          {/* Watch Now Button - Center Centered */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-black/40 backdrop-blur-[2px] z-10">
+             <div className="px-6 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                Watch Now
              </div>
           </div>
 
-          {/* Watch Now Overlay */}
-          {reportStep === 'none' && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-10">
-               <div className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest shadow-2xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                  Watch Now
-               </div>
-            </div>
-          )}
+          {/* Bottom Gradient Scrim */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-0" />
         </Link>
 
         {/* Professional Report Overlay */}
@@ -238,13 +238,16 @@ export default function EventCard({ event }) {
           <div className="flex items-start justify-between gap-1">
             <Link to={`/event/${event.id}`} className="min-w-0">
               <h3 className={`text-sm font-bold line-clamp-1 leading-snug group-hover:text-indigo-400 transition-colors ${
-                isLight ? 'text-black font-black' : 'text-white'
+                isLight ? 'text-black' : 'text-white'
               }`}>
                 {event.title}
               </h3>
-              <p className={`text-xs mt-0.5 font-bold ${isLight ? 'text-slate-500 font-extrabold' : 'text-neutral-500'}`}>
-                {event.creator}
-              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <p className={`text-xs font-bold ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                  {event.creator}
+                </p>
+                {event.isVerified && <CheckCircle2 className="w-3 h-3 text-indigo-500 shrink-0" />}
+              </div>
             </Link>
 
             <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
@@ -329,6 +332,6 @@ export default function EventCard({ event }) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

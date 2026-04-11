@@ -5,33 +5,31 @@ export const USER_NAMES = [
 ];
 
 export const CHAT_MESSAGES = [
+  'LFG! 🚀',
   'This is amazing! 🔥',
-  'Who is winning?',
-  'Let\'s goooooo!',
-  'I can\'t believe this is happening.',
-  'PogChamp',
-  'Stream lagging for anyone else?',
-  'W',
-  'LMAO',
-  'What a play!',
-  'Hi YouTube!',
-  'Can we get some hype in the chat?',
-  'GG',
-  'I\'ve been waiting all day for this.',
-  'Epic moment right here.',
-  'Kappa',
-  'The quality is insane.',
-  'Is it over?',
+  '@You check this out!',
+  'W developer for this UI.',
+  'Can we get a replay?',
+  'GG WP',
+  'SHEEEEEEEESH',
+  'Wait for it...',
   'Nice move!',
   'Wow, just wow.',
+  '@You is a legend.',
   'My heart is pounding.'
 ];
 
-export const generateChatMessage = () => ({
-  id: Math.random().toString(36).substr(2, 9),
-  user: USER_NAMES[Math.floor(Math.random() * USER_NAMES.length)],
-  message: CHAT_MESSAGES[Math.floor(Math.random() * CHAT_MESSAGES.length)],
-  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  isDonation: Math.random() > 0.9, 
-  amount: Math.random() > 0.9 ? Math.floor(Math.random() * 50) + 5 : 0
-});
+export const generateChatMessage = () => {
+  const roles = ['user', 'user', 'user', 'sub', 'sub', 'vip', 'mod', 'founder', 'top_fan'];
+  const role = roles[Math.floor(Math.random() * roles.length)];
+  return {
+    id: Math.random().toString(36).substr(2, 9),
+    user: USER_NAMES[Math.floor(Math.random() * USER_NAMES.length)],
+    message: CHAT_MESSAGES[Math.floor(Math.random() * CHAT_MESSAGES.length)],
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    role,
+    isVerified: Math.random() > 0.85,
+    isDonation: Math.random() > 0.92, 
+    amount: Math.random() > 0.92 ? Math.floor(Math.random() * 50) + 5 : 0
+  };
+};
