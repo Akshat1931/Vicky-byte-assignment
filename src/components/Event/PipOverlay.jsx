@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from 'react';
+import { useState, useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Maximize2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -7,19 +7,15 @@ import { useStreaming } from '../../context/StreamingContext';
 
 export default function PipOverlay() {
   const { theme } = useContext(ThemeContext);
-  const { activeStream, setActiveStream } = useStreaming();
+  const { 
+    activeStream, setActiveStream, 
+    volume, setGlobalVolume, 
+    isMuted, setGlobalMuted 
+  } = useStreaming();
   const location = useLocation();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [volume, setVolume] = useState(() => {
-     try {
-        return Number(localStorage.getItem('ss-volume')) || 0.8;
-     } catch {
-        return 0.8;
-     }
-  });
-  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
   const lastSyncedTime = useRef(0);
   
@@ -35,9 +31,9 @@ export default function PipOverlay() {
         setIsVisible(false);
         // Clean up when hidden to stop audio immediately
         if (videoRef.current) {
-           videoRef.current.pause();
-           videoRef.current.src = "";
-           videoRef.current.load();
+          videoRef.current.pause();
+          videoRef.current.src = "";
+          videoRef.current.load();
         }
       }
     }
@@ -63,8 +59,8 @@ export default function PipOverlay() {
     }
   }, [isPaused, isVisible]);
 
-  // Sync Volume/Mute with hardware
-  useEffect(() => {
+  // Sync Volume/Mute with hardware - SHIELD: Use useLayoutEffect for zero-latency sync
+  useLayoutEffect(() => {
      if (videoRef.current) {
         videoRef.current.volume = volume;
         videoRef.current.muted = isMuted;
@@ -72,16 +68,7 @@ export default function PipOverlay() {
   }, [volume, isMuted]);
 
   const handleVolumeChange = (newVal) => {
-     const val = parseFloat(newVal);
-     setVolume(val);
-     if (val > 0) setIsMuted(false);
-     else if (val === 0) setIsMuted(true);
-     
-     try {
-        localStorage.setItem('ss-volume', val);
-     } catch (e) {
-        console.warn("Storage blocked, volume will not persist across sessions", e);
-     }
+     setGlobalVolume(newVal);
   };
 
   if (!isVisible || !activeStream) return null;
@@ -117,7 +104,7 @@ export default function PipOverlay() {
                    }
                    setIsVisible(false);
                    navigate(`/event/${activeStream.id}`);
-                }}
+                 }}
                 className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-indigo-500 transition-all"
                 title="Expand to Full View"
              >
@@ -142,7 +129,11 @@ export default function PipOverlay() {
                      setActiveStream({ ...activeStream, timestamp: time });
                   }
                }}
+               onPlay={() => {
+                  if (videoRef.current) videoRef.current.volume = volume;
+               }}
                onLoadedMetadata={() => {
+                  if (videoRef.current) videoRef.current.volume = volume;
                   if (activeStream?.timestamp && videoRef.current) {
                      videoRef.current.currentTime = activeStream.timestamp;
                   }
@@ -180,7 +171,7 @@ export default function PipOverlay() {
                 
                 <div className="flex items-center gap-2 group/vol">
                    <button 
-                      onClick={() => setIsMuted(!isMuted)}
+                      onClick={() => setGlobalMuted(!isMuted)}
                       className="text-neutral-500 hover:text-indigo-500 transition-colors"
                    >
                       {(isMuted || volume === 0) ? <VolumeX className="w-3 h-3 text-rose-500" /> : <Volume2 className="w-3 h-3 text-indigo-500" />}

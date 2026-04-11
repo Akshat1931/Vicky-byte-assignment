@@ -6,6 +6,34 @@ export function StreamingProvider({ children }) {
   const [hiddenIds, setHiddenIds] = useState([]);
   const [undoData, setUndoData] = useState(null);
   const [activeStream, setActiveStreamState] = useState(null);
+  
+  // GLOBAL AUDIO STATE: Master source of truth for all players
+  const [volume, setVolumeState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ss-volume');
+      return saved !== null ? Number(saved) : 0.8;
+    } catch {
+      return 0.8;
+    }
+  });
+  const [isMuted, setIsMutedState] = useState(false);
+
+  const setGlobalVolume = useCallback((val) => {
+    const v = parseFloat(val);
+    setVolumeState(v);
+    if (v > 0) setIsMutedState(false);
+    else if (v === 0) setIsMutedState(true);
+    
+    try {
+      localStorage.setItem('ss-volume', v);
+    } catch (e) {
+      console.warn("Storage blocked", e);
+    }
+  }, []);
+
+  const setGlobalMuted = useCallback((muted) => {
+    setIsMutedState(muted);
+  }, []);
 
   const hideEvent = useCallback((id) => {
     const stringId = String(id);
@@ -48,8 +76,12 @@ export function StreamingProvider({ children }) {
     undoData,
     setUndoData,
     activeStream,
-    setActiveStream
-  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream, setActiveStream]);
+    setActiveStream,
+    volume,
+    isMuted,
+    setGlobalVolume,
+    setGlobalMuted
+  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream, setActiveStream, volume, isMuted, setGlobalVolume, setGlobalMuted]);
 
   return (
     <StreamingContext.Provider value={value}>

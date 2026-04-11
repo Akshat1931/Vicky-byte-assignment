@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useRef, useEffect } from 'react';
+import { useState, useCallback, useContext, useRef, useEffect, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
    Settings, Signal, Gauge, Radio, Sparkles, X, 
@@ -25,12 +25,14 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
    const isDark = theme === 'dark';
    const videoRef = useRef(null);
    const lastSyncedTime = useRef(0);
-   const { activeStream, setActiveStream } = useStreaming();
+   const { 
+      activeStream, setActiveStream, 
+      volume, setGlobalVolume, 
+      isMuted, setGlobalMuted 
+   } = useStreaming();
 
    // Elite Media State
    const [isPlaying, setIsPlaying] = useState(true);
-   const [volume, setVolume] = useState(() => Number(localStorage.getItem('ss-volume')) || 0.8);
-   const [isMuted, setIsMuted] = useState(false);
    const [progress, setProgress] = useState(0);
    const [duration, setDuration] = useState(0);
    const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
@@ -87,11 +89,12 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
       }
    }, [hud.visible, isVolumeDragging]);
 
-   useEffect(() => {
+   useLayoutEffect(() => {
       // Reset state and attempt autoplay logic when source changes
       if (videoRef.current) {
          setIsAutoplayBlocked(false);
          videoRef.current.volume = volume;
+         videoRef.current.muted = isMuted;
          
          const playPromise = videoRef.current.play();
          if (playPromise !== undefined) {
@@ -155,10 +158,8 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
 
    const handleVolume = (newVol) => {
       const v = parseFloat(newVol);
-      setVolume(v);
-      setIsMuted(v === 0);
+      setGlobalVolume(v);
       if (videoRef.current) videoRef.current.volume = v;
-      localStorage.setItem('ss-volume', v);
       triggerHUD('volume', Math.round(v * 100) + '%');
    };
 
@@ -498,13 +499,23 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
                }
             }}
             onLoadedMetadata={(e) => {
+               if (videoRef.current) {
+                  videoRef.current.volume = volume;
+                  videoRef.current.muted = isMuted;
+               }
                setDuration(e.target.duration);
                // Immediate fallback sync for fast-loading streams
                if (activeStream?.id === event.id && activeStream?.timestamp && e.target.duration > 0) {
                   performSecureSeek(activeStream.timestamp);
                }
             }}
-            onPlay={() => setIsPlaying(true)}
+            onPlay={() => {
+               setIsPlaying(true);
+               if (videoRef.current) {
+                  videoRef.current.volume = volume;
+                  videoRef.current.muted = isMuted;
+               }
+            }}
             onPause={() => {
                setIsPlaying(false);
                if (videoRef.current) {
