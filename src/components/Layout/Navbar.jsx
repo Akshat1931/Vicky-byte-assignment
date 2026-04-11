@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Bell, User, Sun, Moon, Check, ChevronRight, X, LayoutGrid, Gamepad2, TrendingUp, LayoutDashboard, CreditCard, Settings, Users, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockEvents } from '../../data/mockEvents';
+import { mockUser } from '../../data/mockUser';
 
 export default function Navbar({ theme, onToggleTheme }) {
   const navigate = useNavigate();
@@ -15,11 +16,7 @@ export default function Navbar({ theme, onToggleTheme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   
-  const [notifications] = useState([
-    { id: 'n1', text: 'Neon Nights Virtual Concert is live now', time: '2m ago' },
-    { id: 'n2', text: 'New event in Technology you may like', time: '15m ago' },
-    { id: 'n3', text: 'Your followed creator just scheduled a stream', time: '1h ago' },
-  ]);
+  const [notifications] = useState(mockUser.notifications);
   const bellRef = useRef(null);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
@@ -270,8 +267,8 @@ export default function Navbar({ theme, onToggleTheme }) {
                     aria-label="Profile menu"
                   >
                     <img 
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" 
-                      alt="User" 
+                      src={mockUser.avatar} 
+                      alt={mockUser.name} 
                       className="w-full h-full object-cover relative z-10"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, mockEvents } from '../data/mockEvents';
 import EventCard from '../components/Home/EventCard';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/Core/SEO';
 import { 
   Compass, 
   Gamepad2, 
@@ -84,6 +85,10 @@ export default function Browse() {
 
   return (
     <div className="app-container py-8 md:py-12 space-y-12 relative overflow-hidden">
+      <SEO 
+        title={`${selectedCategory === 'All' ? 'Browse High-Fidelity Streams' : `Live ${selectedCategory} Streams`}`} 
+        description={`Explore the best live ${selectedCategory.toLowerCase()} content on StreamSphere. High-end visuals, interactive chat, and trending creators.`}
+      />
       {/* Dynamic Background Glow based on category */}
       <AnimatePresence mode="wait">
          <motion.div 

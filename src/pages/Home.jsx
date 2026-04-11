@@ -3,10 +3,15 @@ import Hero from '../components/Home/Hero';
 import LivePulseStrip from '../components/Home/LivePulseStrip';
 import EventGrid from '../components/Home/EventGrid';
 import CategoryShelves from '../components/Home/CategoryShelves';
+import SEO from '../components/Core/SEO';
 
 export default function Home() {
   return (
     <div className="w-full">
+      <SEO 
+        title="Live Streaming Platform" 
+        description="Experience high-fidelity live streaming on StreamSphere. Discover gaming, tech, and live events with custom controls and real-time chat."
+      />
       <Hero />
       <LivePulseStrip />
       <div className="app-container py-6">

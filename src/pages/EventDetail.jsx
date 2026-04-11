@@ -9,6 +9,7 @@ import SuggestedEvents from '../components/Event/SuggestedEvents';
 import { MessageSquarePlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStreaming } from '../context/StreamingContext';
+import SEO from '../components/Core/SEO';
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -40,6 +41,11 @@ export default function EventDetail() {
     <div className={`app-container relative transition-all duration-300 ${
       isPiPActive ? 'py-0' : 'py-4 sm:py-6 lg:py-8'
     }`}>
+      <SEO 
+        title={event.title} 
+        description={`Watch ${event.creator} stream ${event.title} live on StreamSphere. High-fidelity video, custom controls, and more.`}
+        image={event.thumbnail}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 transition-all duration-500">
 
         {/* ── Video Container ── */}

@@ -3,6 +3,7 @@ import { mockEvents } from '../data/mockEvents';
 import EventCard from '../components/Home/EventCard';
 import { Heart, Play, Calendar, Activity, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SEO from '../components/Core/SEO';
 
 const FOLLOWED_CREATORS = [
   { name: 'ESL Network', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop', isLive: true, category: 'Gaming' },
@@ -82,6 +83,10 @@ export default function Following() {
 
   return (
     <div className="app-container py-8 md:py-12 space-y-12 md:space-y-16 relative">
+      <SEO 
+        title="Your Following" 
+        description="Stay updated with your favorite creators on StreamSphere. Real-time notifications and live stream updates just for you."
+      />
       {/* Background Signature Glow */}
       <div className="absolute top-0 right-0 -z-10 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-indigo-500/5 blur-[150px] pointer-events-none rounded-full" />
 

@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Shield, Bell, Eye, Moon, Globe, Trash2, Mail, Lock, Check, Radio, Gauge, Signal, Sparkles } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import SEO from '../components/Core/SEO';
 
 export default function Settings() {
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -25,6 +26,10 @@ export default function Settings() {
       animate={{ opacity: 1 }} 
       className="app-container py-12 pb-24"
     >
+      <SEO 
+        title="Account Settings" 
+        description="Customize your StreamSphere experience. Manage security, notification preferences, and visual themes in one place."
+      />
       <div className="mb-10">
          <h1 className={`text-3xl font-black tracking-tight ${isLight ? 'text-black' : 'text-white'}`}>Settings</h1>
          <p className="text-neutral-500 font-bold mt-2">Manage your account preferences and security settings.</p>

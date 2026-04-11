@@ -2,19 +2,26 @@ import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Users, DollarSign, PlayCircle, Clock, Zap, BarChart3, ArrowUpRight, ArrowDownRight, Video, MessageSquare, Calendar } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import SEO from '../components/Core/SEO';
+import { mockUser } from '../data/mockUser';
 
 export default function Dashboard() {
   const { theme } = useContext(ThemeContext);
   const isLight = theme === 'light';
 
-  const stats = [
-    { label: 'Live Viewers', value: '12.4K', change: '+12%', trend: 'up', icon: <Users className="w-5 h-5 text-indigo-500" /> },
-    { label: 'Followers', value: '842.1K', change: '+2.4K', trend: 'up', icon: <TrendingUp className="w-5 h-5 text-indigo-500" /> },
-    { label: 'Revenue', value: '$4,290', change: '-5%', trend: 'down', icon: <DollarSign className="w-5 h-5 text-indigo-500" /> },
+  // Map user stats for the dashboard display
+  const dashboardStats = [
+    { label: 'Live Viewers', value: mockUser.stats[0].value, change: mockUser.stats[0].change, trend: mockUser.stats[0].trend, icon: <Users className="w-5 h-5 text-indigo-500" /> },
+    { label: 'Followers', value: mockUser.stats[1].value, change: mockUser.stats[1].change, trend: mockUser.stats[1].trend, icon: <TrendingUp className="w-5 h-5 text-indigo-500" /> },
+    { label: 'Revenue', value: mockUser.stats[3].value, change: mockUser.stats[3].change, trend: mockUser.stats[3].trend, icon: <DollarSign className="w-5 h-5 text-indigo-500" /> },
   ];
 
   return (
     <div className="flex-1 p-6 md:p-8">
+      <SEO 
+        title="Creator Dashboard" 
+        description="Monitor your stream performance, engage with your audience, and manage your content on the StreamSphere Creator Dashboard."
+      />
       <div className="max-w-7xl mx-auto">
         <header className="mb-10">
           <p className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">Creator Hub</p>
@@ -25,7 +32,7 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {stats.map((stat) => (
+          {dashboardStats.map((stat) => (
             <motion.div
               key={stat.label}
               whileHover={{ y: -4 }}
@@ -78,13 +85,13 @@ export default function Dashboard() {
              <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14] border-white/5'}`}>
                 <h3 className={`text-lg font-black mb-6 ${isLight ? 'text-slate-900' : 'text-white'}`}>Recent Activities</h3>
                 <div className="space-y-4">
-                   {[
-                     { user: 'Sarah King', action: 'subscribed to your channel', time: '2m ago', icon: <MessageSquare className="w-4 h-4 text-indigo-400" /> },
-                     { user: 'StreamBot', action: 'moderated spam in chat', time: '15m ago', icon: <Zap className="w-4 h-4 text-amber-400" /> },
-                     { user: 'Global Network', action: 'hosted your stream (2.4K viewers)', time: '1h ago', icon: <PlayCircle className="w-4 h-4 text-rose-400" /> },
-                   ].map((item, i) => (
-                      <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl transition-colors ${isLight ? 'hover:bg-slate-50' : 'hover:bg-white/5'}`}>
-                         <div className={`p-2 rounded-xl scale-95 ${isLight ? 'bg-slate-100' : 'bg-white/5'}`}>{item.icon}</div>
+                   {mockUser.activities.map((item) => (
+                      <div key={item.id} className={`flex items-start gap-4 p-4 rounded-2xl transition-colors ${isLight ? 'hover:bg-slate-50' : 'hover:bg-white/5'}`}>
+                         <div className={`p-2 rounded-xl scale-95 ${isLight ? 'bg-slate-100' : 'bg-white/5'}`}>
+                            {item.type === 'subscription' && <MessageSquare className="w-4 h-4 text-indigo-400" />}
+                            {item.type === 'mod' && <Zap className="w-4 h-4 text-amber-400" />}
+                            {item.type === 'host' && <PlayCircle className="w-4 h-4 text-rose-400" />}
+                         </div>
                          <div className="flex-1">
                             <p className="text-sm">
                                <span className={`font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.user}</span>{' '}

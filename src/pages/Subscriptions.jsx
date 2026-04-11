@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Bell, TrendingUp, Grid, List, CheckCircle2 } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import SEO from '../components/Core/SEO';
 
 const FOLLOWED_CREATORS = [
   { id: 1, name: 'ESL Network', subs: '1.2M', isLive: true, category: 'Gaming' },
@@ -22,6 +23,10 @@ export default function Subscriptions() {
       animate={{ opacity: 1, y: 0 }} 
       className="app-container py-12 pb-24"
     >
+      <SEO 
+        title="Your Subscriptions" 
+        description="Manage your followed creators, notification preferences, and subscription status on StreamSphere. Never miss a live moment."
+      />
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
          <div>
             <h1 className={`text-4xl font-black tracking-tight ${isLight ? 'text-black' : 'text-white'}`}>Subscriptions</h1>

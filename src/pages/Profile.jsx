@@ -2,17 +2,15 @@ import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { User, MapPin, Link as LinkIcon, Calendar, Edit3, Settings, Grid, Heart, Bell } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import SEO from '../components/Core/SEO';
+import { mockUser } from '../data/mockUser';
 
 export default function Profile() {
   const { theme } = useContext(ThemeContext);
   const isLight = theme === 'light';
 
-  const stats = [
-    { label: 'Followers', value: '12.4K' },
-    { label: 'Following', value: '842' },
-    { label: 'Total Views', value: '1.2M' },
-    { label: 'Streams', value: '156' },
-  ];
+  // Pulling stats dynamically from mockUser
+  const stats = mockUser.stats.slice(0, 4);
 
   return (
     <motion.div 
@@ -20,6 +18,10 @@ export default function Profile() {
       animate={{ opacity: 1 }} 
       className="min-h-screen pb-20"
     >
+      <SEO 
+        title="Your Profile" 
+        description="View and manage your StreamSphere profile. Check your latest activity, followers, and stream history in one premium dashboard."
+      />
       {/* ── Header / Cover ── */}
       <div className="relative h-48 md:h-72 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-500">
          <div className="absolute inset-0 bg-black/20" />
@@ -43,8 +45,8 @@ export default function Profile() {
             <div className="flex-1 pb-2">
                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h1 className={`text-3xl md:text-4xl font-black tracking-tight ${isLight ? 'text-black' : 'text-white'}`}>Vicky Bytes</h1>
-                    <p className="text-indigo-500 font-bold tracking-tight">@vickybytes_pro</p>
+                    <h1 className={`text-3xl md:text-4xl font-black tracking-tight ${isLight ? 'text-black' : 'text-white'}`}>{mockUser.name}</h1>
+                    <p className="text-indigo-500 font-bold tracking-tight">@{mockUser.username}</p>
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -68,21 +70,21 @@ export default function Profile() {
                <div className={`p-6 rounded-3xl border shadow-xl ${isLight ? 'bg-white border-slate-100' : 'bg-[#0b0b0d] border-white/5'}`}>
                   <h3 className={`text-sm font-black uppercase tracking-widest mb-4 ${isLight ? 'text-slate-400' : 'text-neutral-500'}`}>About</h3>
                   <p className={`text-sm leading-relaxed font-bold ${isLight ? 'text-slate-700' : 'text-neutral-400'}`}>
-                    Professional streamer and creative developer exploring the boundaries of virtual interaction. Join me for daily tech deep-dives and gaming sessions!
+                    {mockUser.bio}
                   </p>
                   
                   <div className="mt-6 space-y-4">
                      <div className="flex items-center gap-3 text-xs font-bold text-neutral-500">
                         <MapPin className="w-4 h-4" />
-                        <span>San Francisco, CA</span>
+                        <span>{mockUser.location}</span>
                      </div>
                      <div className="flex items-center gap-3 text-xs font-bold text-indigo-500">
                         <LinkIcon className="w-4 h-4" />
-                        <a href="#" className="hover:underline">vickybytes.dev</a>
+                        <a href={`https://${mockUser.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{mockUser.website}</a>
                      </div>
                      <div className="flex items-center gap-3 text-xs font-bold text-neutral-500">
                         <Calendar className="w-4 h-4" />
-                        <span>Joined March 2024</span>
+                        <span>Joined {mockUser.joinedDate}</span>
                      </div>
                   </div>
                </div>
@@ -116,12 +118,13 @@ export default function Profile() {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[1, 2, 3, 4].map(idx => (
-                     <div key={idx} className={`aspect-video rounded-2xl border overflow-hidden relative group cursor-pointer ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-white/5 border-white/5'}`}>
+                  {mockUser.recentStreams.map((stream) => (
+                     <div key={stream.id} className={`aspect-video rounded-2xl border overflow-hidden relative group cursor-pointer ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-white/5 border-white/5'}`}>
+                        <img src={stream.thumbnail} alt={stream.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent group-hover:bg-black/40 transition-all duration-300" />
                         <div className="absolute bottom-4 left-4 right-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                            <p className="text-white font-bold text-sm truncate">Weekly Tech Wrap-up #{idx}</p>
-                            <p className="text-white/60 text-[10px] mt-1 font-bold italic">2.4K views • 2 days ago</p>
+                            <p className="text-white font-bold text-sm truncate">{stream.title}</p>
+                            <p className="text-white/60 text-[10px] mt-1 font-bold italic">{stream.views} views • {stream.date}</p>
                         </div>
                      </div>
                   ))}

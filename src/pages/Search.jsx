@@ -5,6 +5,7 @@ import EventCard from '../components/Home/EventCard';
 import SkeletonCard from '../components/Common/SkeletonCard';
 import { Search as SearchIcon, Filter, TrendingUp, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/Core/SEO';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -42,6 +43,10 @@ export default function Search() {
 
   return (
     <div className="app-container py-8 md:py-12 space-y-12 min-h-screen">
+      <SEO 
+        title={query ? `Results for "${query}"` : 'Search Streams'} 
+        description={`Find the best live streams and creators for "${query}" on StreamSphere. High-end discovery for gaming, tech, and more.`}
+      />
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
