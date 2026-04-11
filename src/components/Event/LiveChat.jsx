@@ -16,6 +16,7 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
   // Mobile feed toggle state
   const [mobileFeedOpen, setMobileFeedOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [tipStep, setTipStep] = useState('none'); // 'none', 'select'
   
   const shouldReduceMotion = useReducedMotion();
   const messageContainerRef = useRef(null);
@@ -75,6 +76,25 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
     setMessages((prev) => [...prev, newMsg]);
     setInputMessage('');
     setEmojiPickerOpen(false);
+  };
+
+  const handleSendTip = (amount) => {
+    // LINK: Use the current input message if present, otherwise use a default premium label
+    const userMessage = inputMessage.trim() || "Diamond Tier Support! 💎";
+    
+    const newMsg = {
+      id: Math.random().toString(36).substr(2, 9),
+      user: 'You',
+      message: userMessage,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isDonation: true,
+      amount: amount
+    };
+    
+    setMessages((prev) => [...prev, newMsg]);
+    setTipStep('none');
+    setInputMessage(''); // Clear the input after sending the linked super chat
+    scrollToBottom();
   };
 
   const onMessagesScroll = () => {
@@ -274,15 +294,48 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
                 ))}
               </motion.div>
             )}
+            
+            {tipStep === 'select' && (
+               <motion.div 
+                 initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                 className={`absolute bottom-full mb-3 left-0 w-full p-3 rounded-2xl border shadow-2xl z-[110] ${
+                   isLight ? 'bg-white border-slate-200' : 'bg-[#121214]/95 border-white/10 backdrop-blur-xl'
+                 }`}
+               >
+                  <div className="flex items-center justify-between mb-3 px-1">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Super Chat Tips</span>
+                     <button onClick={() => setTipStep('none')}><X className="w-3 h-3 text-neutral-500" /></button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                     {[5, 10, 50].map(amt => (
+                        <button
+                           key={amt}
+                           type="button"
+                           onClick={() => handleSendTip(amt)}
+                           className="bg-amber-500 hover:bg-amber-400 text-white font-black py-2 rounded-xl transition-all active:scale-95 text-xs shadow-lg shadow-amber-500/20"
+                        >
+                           ${amt}
+                        </button>
+                     ))}
+                  </div>
+               </motion.div>
+            )}
           </AnimatePresence>
 
           <div className="flex items-center gap-2 relative">
             <button 
               type="button" 
-              onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}
+              onClick={() => { setEmojiPickerOpen(!emojiPickerOpen); setTipStep('none'); }}
               className={`p-1.5 transition-colors ${emojiPickerOpen ? 'text-indigo-500' : 'text-neutral-500 hover:text-indigo-400'}`}
             >
               <Smile className="w-5 h-5" />
+            </button>
+            <button 
+              type="button" 
+              onClick={() => { setTipStep(tipStep === 'none' ? 'select' : 'none'); setEmojiPickerOpen(false); }}
+              className={`p-1.5 transition-colors ${tipStep !== 'none' ? 'text-amber-500' : 'text-neutral-500 hover:text-amber-400'}`}
+            >
+              <Gift className="w-5 h-5" />
             </button>
             <input
               type="text"

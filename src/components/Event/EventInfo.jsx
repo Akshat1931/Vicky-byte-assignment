@@ -33,7 +33,9 @@ export default function EventInfo({ event }) {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [reportStep, setReportStep] = useState('none'); // 'none', 'reasons', 'success'
+  const [reportStep, setReportStep] = useState('none');
+  const [donateStep, setDonateStep] = useState('none'); // 'none', 'tiers', 'success'
+  const [isSaved, setIsSaved] = useState(false);
   const [showHype, setShowHype] = useState(false);
 
   // Toggle Like ONLY (Professional behavior)
@@ -64,13 +66,14 @@ export default function EventInfo({ event }) {
   };
 
   useEffect(() => {
-    if (reportStep === 'success') {
+    if (reportStep === 'success' || donateStep === 'success') {
       const timer = setTimeout(() => {
         setReportStep('none');
+        setDonateStep('none');
       }, 2500);
       return () => clearTimeout(timer);
     }
-  }, [reportStep]);
+  }, [reportStep, donateStep]);
 
   return (
     <motion.div 
@@ -111,6 +114,7 @@ export default function EventInfo({ event }) {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => setDonateStep('tiers')}
             className="flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-[0_4px_12px_rgba(99,102,241,0.3)]"
           >
             Donate
@@ -137,10 +141,24 @@ export default function EventInfo({ event }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShare}
-            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all shadow-lg"
+            className={`flex items-center gap-2 border px-4 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 shadow-lg ${
+              copied 
+                ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-400' 
+                : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+            }`}
           >
-            <Share2 className="w-3.5 h-3.5 sm:w-4 h-4" /> 
-            <span className="hidden xs:block">{copied ? 'Copied' : 'Share'}</span>
+            <AnimatePresence mode="wait">
+              {copied ? (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} key="check">
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 h-4 text-indigo-400" />
+                </motion.div>
+              ) : (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} key="share">
+                  <Share2 className="w-3.5 h-3.5 sm:w-4 h-4" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <span className="hidden xs:block">{copied ? 'Link Copied' : 'Share'}</span>
           </motion.button>
 
           {/* More Menu */}
@@ -171,14 +189,23 @@ export default function EventInfo({ event }) {
                   >
                     Report stream
                   </button>
-                  <button onClick={() => setMenuOpen(false)} className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${isLight ? 'text-slate-700 hover:bg-slate-50' : 'text-neutral-100 hover:bg-white/5'}`}>Save for later</button>
+                  <button 
+                    onClick={() => { setIsSaved(!isSaved); setMenuOpen(false); }} 
+                    className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors flex items-center justify-between group ${
+                      isSaved 
+                        ? 'text-indigo-400 bg-white/5' 
+                        : (isLight ? 'text-slate-700 hover:bg-slate-50' : 'text-neutral-100 hover:bg-white/5')
+                    }`}
+                  >
+                    {isSaved ? 'Saved in library' : 'Save for later'}
+                    {isSaved && <CheckCircle2 className="w-3 h-3 text-indigo-400" />}
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Event Info Report Overlay (Dropdown replacement style) */}
             <AnimatePresence>
-              {reportStep !== 'none' && (
+              {(reportStep !== 'none' || donateStep !== 'none') && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                   className={`absolute right-0 top-full mt-2 w-64 rounded-2xl border p-4 shadow-2xl z-[300] ${
@@ -186,12 +213,72 @@ export default function EventInfo({ event }) {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-white'}`}>Report Stream</h4>
-                    <button onClick={() => setReportStep('none')} className={`p-1 rounded-full transition-colors ${isLight ? 'hover:bg-slate-100 text-slate-400' : 'hover:bg-white/10 text-white/60'}`}>
+                    <h4 className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      {reportStep !== 'none' ? 'Report Stream' : 'Support Creator'}
+                    </h4>
+                    <button onClick={() => { setReportStep('none'); setDonateStep('none'); }} className={`p-1 rounded-full transition-colors ${isLight ? 'hover:bg-slate-100 text-slate-400' : 'hover:bg-white/10 text-white/60'}`}>
                       <X className="w-4 h-4" />
                     </button>
                   </div>
 
+                  {/* Donate Flow */}
+                  {donateStep === 'tiers' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[2, 5, 10, 20].map(amt => (
+                          <button
+                            key={amt}
+                            onClick={() => { setDonateStep('success'); setShowHype(true); setTimeout(() => setShowHype(false), 2000); }}
+                            className="bg-indigo-500/10 hover:bg-indigo-500 border border-indigo-500/20 hover:border-indigo-400 text-indigo-400 hover:text-white font-black py-2.5 rounded-xl transition-all active:scale-95"
+                          >
+                            ${amt}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <div className="relative pt-2 border-t border-white/10">
+                        <div className="flex items-center gap-2">
+                           <div className="relative flex-1">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">$</span>
+                              <input 
+                                 type="number" 
+                                 placeholder="Custom Tip"
+                                 className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-7 pr-3 text-xs font-bold text-white focus:outline-none focus:border-indigo-500/50 transition-all"
+                                 onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                       setDonateStep('success');
+                                       setShowHype(true);
+                                       setTimeout(() => setShowHype(false), 2000);
+                                    }
+                                 }}
+                              />
+                           </div>
+                           <button 
+                              onClick={() => { setDonateStep('success'); setShowHype(true); setTimeout(() => setShowHype(false), 2000); }}
+                              className="bg-indigo-500 hover:bg-indigo-600 text-white p-2.5 rounded-xl transition-all active:scale-95"
+                           >
+                              <CheckCircle2 className="w-4 h-4" />
+                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {donateStep === 'success' && (
+                    <div className="text-center py-4 space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 mx-auto">
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>
+                          <HeartIcon className="w-6 h-6 text-emerald-400 fill-emerald-400" />
+                        </motion.div>
+                      </div>
+                      <div>
+                        <p className="font-black text-xs uppercase tracking-tight text-white mb-1">Donation Sent!</p>
+                        <p className="text-[11px] text-white/60 leading-relaxed">Thank you for supporting the stream!</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Report Flow */}
                   {reportStep === 'reasons' && (
                     <div className="space-y-1.5">
                       {REPORT_REASONS.map(reason => (
@@ -213,7 +300,6 @@ export default function EventInfo({ event }) {
                     <div className="text-center py-4 space-y-3">
                       <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 mx-auto relative">
                         <CheckCircle2 className="w-6 h-6 text-indigo-400" />
-                        <HypeBurst active={reportStep === 'success'} />
                       </div>
                       <div>
                         <p className={`font-black text-xs uppercase tracking-tight mb-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>Report Submitted</p>

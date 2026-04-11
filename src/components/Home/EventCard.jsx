@@ -277,13 +277,23 @@ export default function EventCard({ event }) {
               {/* Individual Share Button */}
               <button 
                 onClick={handleShare}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-300 relative ${
                   copied 
-                    ? 'text-emerald-500' 
+                    ? 'text-indigo-400 bg-indigo-500/10' 
                     : isLight ? 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50' : 'text-neutral-500 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Share2 className="w-4 h-4" />
+                <AnimatePresence mode="wait">
+                  {copied ? (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} key="check">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </motion.div>
+                  ) : (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} key="share">
+                      <Share2 className="w-4 h-4" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <span className="hidden xs:block text-[11px] font-black">{copied ? 'Copied' : 'Share'}</span>
               </button>
 
