@@ -1,8 +1,12 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 import { mockEvents } from '../../data/mockEvents';
+import { useStreaming } from '../../context/StreamingContext';
 
 export default function SuggestedEvents({ currentEventId }) {
+  const navigate = useNavigate();
+  const { setActiveStream } = useStreaming();
+
   const suggested = mockEvents
     .filter((event) => event.id !== currentEventId)
     .slice(0, 6);
@@ -16,10 +20,13 @@ export default function SuggestedEvents({ currentEventId }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {suggested.map((event) => (
-          <Link
+          <div
             key={event.id}
-            to={`/event/${event.id}`}
-            className="group rounded-xl overflow-hidden border border-white/10 bg-white/[0.03] hover:border-indigo-400/40 transition-colors"
+            onClick={() => {
+               setActiveStream(null);
+               navigate(`/event/${event.id}`);
+            }}
+            className="group rounded-xl overflow-hidden border border-white/10 bg-white/[0.03] hover:border-indigo-400/40 transition-colors cursor-pointer"
           >
             <div className="relative aspect-video">
               <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
@@ -38,7 +45,7 @@ export default function SuggestedEvents({ currentEventId }) {
                 {event.isLive ? `${event.viewers.toLocaleString()} watching` : event.schedule}
               </p>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </section>

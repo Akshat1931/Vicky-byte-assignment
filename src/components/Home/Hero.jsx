@@ -1,12 +1,14 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { mockEvents } from '../../data/mockEvents';
 import { Play } from 'lucide-react';
-
+import { useStreaming } from '../../context/StreamingContext';
 export default function Hero() {
   const containerRef = useRef(null);
   const Motion = motion;
+  const { setActiveStream } = useStreaming();
+  const navigate = useNavigate();
   
   // We track scroll progress specifically over the Hero's designated 300vh wrapper.
   // By using 'scrollYProgress', it cleanly maps 0 to 1 without hard-coded pixel breakpoints that risk breaking on different devices.
@@ -100,24 +102,27 @@ export default function Hero() {
         {/* Timeline Sequence Layer */}
         <div className="absolute inset-x-0 top-[20vh] md:top-[40vh] z-20 flex justify-center items-center w-full max-w-[1600px] mx-auto px-4">
           
-          {/* Left Sub-Card */}
           <Motion.div 
-            className="absolute left-[5%] md:left-[15%] w-48 md:w-[320px] aspect-[3/4] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto"
+            className="absolute left-[5%] md:left-[15%] w-48 md:w-[320px] aspect-[3/4] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto cursor-pointer"
             style={{ x: leftX, y: leftY, rotateZ: leftRotate, opacity: leftOpacity, willChange: 'transform, opacity' }}
+            onClick={() => {
+               setActiveStream(null);
+               navigate(`/event/${featuredEvents[1].id}`);
+            }}
           >
-            <Link to={`/event/${featuredEvents[1].id}`} className="w-full h-full relative cursor-pointer group block">
-              <img src={featuredEvents[1].imageUrl} alt="Sub Event" className="w-full h-full object-cover mix-blend-luminosity opacity-80 group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700" />
-            </Link>
+            <img src={featuredEvents[1].imageUrl} alt="Sub Event" className="w-full h-full object-cover mix-blend-luminosity opacity-80 hover:mix-blend-normal hover:opacity-100 transition-all duration-700" />
           </Motion.div>
 
           {/* Right Sub-Card */}
           <Motion.div 
-            className="absolute right-[5%] md:right-[15%] w-40 md:w-[280px] aspect-[4/5] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto"
+            className="absolute right-[5%] md:right-[15%] w-40 md:w-[280px] aspect-[4/5] md:aspect-video rounded-3xl overflow-hidden glass-panel shadow-[0_0_60px_rgba(0,0,0,0.6)] z-10 border border-white/5 pointer-events-auto cursor-pointer"
             style={{ x: rightX, y: rightY, rotateZ: rightRotate, opacity: rightOpacity, willChange: 'transform, opacity' }}
+            onClick={() => {
+               setActiveStream(null);
+               navigate(`/event/${featuredEvents[2].id}`);
+            }}
           >
-             <Link to={`/event/${featuredEvents[2].id}`} className="w-full h-full relative cursor-pointer group block">
-               <img src={featuredEvents[2].imageUrl} alt="Secondary Event" className="w-full h-full object-cover mix-blend-luminosity opacity-70 group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700" />
-             </Link>
+             <img src={featuredEvents[2].imageUrl} alt="Secondary Event" className="w-full h-full object-cover mix-blend-luminosity opacity-70 hover:mix-blend-normal hover:opacity-100 transition-all duration-700" />
           </Motion.div>
 
           {/* Main Dominant Center Card */}
@@ -135,18 +140,19 @@ export default function Hero() {
                  </div>
                  <h3 className="text-3xl md:text-5xl font-black text-white mb-2 md:mb-4 tracking-tight drop-shadow-xl">{featuredEvents[0].title}</h3>
                  <p className="text-neutral-300 text-sm md:text-lg mb-6 md:mb-8 font-light drop-shadow-md">{featuredEvents[0].creator}</p>
-                 <Link 
-                   to={`/event/${featuredEvents[0].id}`}
-                   className="pointer-events-auto"
-                 >
+                 <div className="pointer-events-auto">
                    <Motion.button 
                      whileHover={{ scale: 1.05 }}
                      whileTap={{ scale: 0.95 }}
+                     onClick={() => {
+                        setActiveStream(null);
+                        navigate(`/event/${featuredEvents[0].id}`);
+                     }}
                      className="flex items-center justify-center gap-2 bg-white text-black font-semibold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-2xl w-max transition-colors hover:bg-neutral-200"
                    >
                      <Play className="w-5 h-5 fill-black" /> Enter Stream
                    </Motion.button>
-                 </Link>
+                 </div>
               </div>
             </div>
           </Motion.div>

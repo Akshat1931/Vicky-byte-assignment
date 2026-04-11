@@ -5,7 +5,7 @@ const StreamingContext = createContext();
 export function StreamingProvider({ children }) {
   const [hiddenIds, setHiddenIds] = useState([]);
   const [undoData, setUndoData] = useState(null);
-  const [activeStream, setActiveStream] = useState(null);
+  const [activeStream, setActiveStreamState] = useState(null);
 
   const hideEvent = useCallback((id) => {
     const stringId = String(id);
@@ -20,6 +20,27 @@ export function StreamingProvider({ children }) {
     }
   }, [undoData]);
 
+  const setActiveStream = useCallback((data) => {
+    setActiveStreamState(prev => {
+      // Handle functional updates (prev => ...)
+      const incoming = typeof data === 'function' ? data(prev) : data;
+      
+      if (!incoming) return null;
+      
+      // If we are setting the same stream, preserve the old timestamp if the incoming one is missing or is 0
+      if (prev && prev.id === incoming.id) {
+        const newTime = Number(incoming.timestamp) || 0;
+        const prevTime = Number(prev.timestamp) || 0;
+        
+        // SHIELD: If new time is 0 (uninitialized) but we have history, ignore the reset.
+        const finalTime = (newTime === 0 && prevTime > 0) ? prevTime : newTime;
+        
+        return { ...prev, ...incoming, timestamp: finalTime };
+      }
+      return incoming;
+    });
+  }, []);
+
   const value = useMemo(() => ({
     hiddenIds,
     hideEvent,
@@ -28,7 +49,7 @@ export function StreamingProvider({ children }) {
     setUndoData,
     activeStream,
     setActiveStream
-  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream]);
+  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream, setActiveStream]);
 
   return (
     <StreamingContext.Provider value={value}>

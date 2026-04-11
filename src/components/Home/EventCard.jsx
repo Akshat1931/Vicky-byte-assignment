@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Share2, Eye, Calendar, MoreVertical, X, Ban, Link2, RotateCcw, Flag, CheckCircle2 } from 'lucide-react';
 import { useStreaming } from '../../context/StreamingContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -40,7 +40,16 @@ const REPORT_REASONS = [
 export default function EventCard({ event }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
-  const { hideEvent } = useStreaming();
+  const navigate = useNavigate();
+  const { hideEvent, setActiveStream } = useStreaming();
+
+  const handleWatchNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // INSTANT TERMINATION: Kill previous PiP before navigating
+    setActiveStream(null);
+    navigate(`/event/${event.id}`);
+  };
   
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(event.likes || 0);
@@ -115,17 +124,17 @@ export default function EventCard({ event }) {
       className="group flex flex-col relative"
     >
       <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#0a0a0f] border border-white/5 shadow-2xl group-hover:shadow-indigo-500/10 transition-shadow duration-500">
-        <Link to={`/event/${event.id}`} className="block w-full h-full">
+        <div className="block w-full h-full" onClick={handleWatchNow}>
           {!imgError ? (
             <motion.img 
               whileHover={{ scale: 1.15, rotate: 1 }}
               src={event.imageUrl} 
               alt={event.title}
               onError={() => setImgError(true)}
-              className={`w-full h-full object-cover transition-all duration-700 ${reportStep !== 'none' ? 'blur-md' : ''}`}
+              className={`w-full h-full object-cover cursor-pointer transition-all duration-700 ${reportStep !== 'none' ? 'blur-md' : ''}`}
             />
           ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${avatarColor(event.category)} flex items-center justify-center opacity-60`}>
+            <div className={`w-full h-full cursor-pointer bg-gradient-to-br ${avatarColor(event.category)} flex items-center justify-center opacity-60`}>
               <Link2 className="w-10 h-10 text-white/40" />
             </div>
           )}
@@ -162,7 +171,7 @@ export default function EventCard({ event }) {
 
           {/* Bottom Gradient Scrim */}
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-0" />
-        </Link>
+        </div>
 
         {/* Professional Report Overlay */}
         <AnimatePresence>

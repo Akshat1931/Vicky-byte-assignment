@@ -1,6 +1,6 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Maximize2, Play, Pause, Volume2 } from 'lucide-react';
+import { X, Maximize2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useStreaming } from '../../context/StreamingContext';
@@ -12,6 +12,9 @@ export default function PipOverlay() {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef(null);
+  const lastSyncedTime = useRef(0);
   
   const isLight = theme === 'light';
 
@@ -21,15 +24,44 @@ export default function PipOverlay() {
     if (!isEventPage && activeStream) {
       setIsVisible(true);
     } else {
-      setIsVisible(false);
+      if (isVisible) {
+        setIsVisible(false);
+        // Clean up when hidden to stop audio immediately
+        if (videoRef.current) {
+           videoRef.current.pause();
+           videoRef.current.src = "";
+           videoRef.current.load();
+        }
+      }
     }
-  }, [location.pathname, activeStream]);
+  }, [location.pathname, activeStream, isVisible]);
+
+  // Reactive Seek: Sync PiP with actual timestamp as it arrives
+  useEffect(() => {
+     if (videoRef.current && isVisible && activeStream?.timestamp) {
+        const diff = Math.abs(videoRef.current.currentTime - activeStream.timestamp);
+        // Only seek if we are more than 1 second off (prevent loop)
+        if (diff > 1 && activeStream.timestamp > lastSyncedTime.current) {
+           videoRef.current.currentTime = activeStream.timestamp;
+           lastSyncedTime.current = activeStream.timestamp;
+        }
+     }
+  }, [activeStream?.timestamp, isVisible]);
+
+  // Handle play/pause state
+  useEffect(() => {
+    if (videoRef.current && isVisible) {
+      if (isPaused) videoRef.current.pause();
+      else videoRef.current.play().catch(() => {});
+    }
+  }, [isPaused, isVisible]);
 
   if (!isVisible || !activeStream) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
+        key={activeStream.id}
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -50,7 +82,14 @@ export default function PipOverlay() {
                 <X className="w-4 h-4" />
              </button>
              <button 
-                onClick={() => navigate(`/event/${activeStream.id}`)}
+                onClick={() => {
+                   if (videoRef.current) {
+                      const currentTime = videoRef.current.currentTime;
+                      setActiveStream(prev => prev ? { ...prev, timestamp: currentTime } : null);
+                   }
+                   setIsVisible(false);
+                   navigate(`/event/${activeStream.id}`);
+                }}
                 className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-indigo-500 transition-all"
                 title="Expand to Full View"
              >
@@ -58,11 +97,28 @@ export default function PipOverlay() {
              </button>
           </div>
 
-          {/* Video / Thumbnail Area */}
+          {/* Video Player Engine */}
           <div className="aspect-video relative bg-black flex items-center justify-center overflow-hidden">
-             <img 
-               src={activeStream.imageUrl || "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070"} 
-               alt={activeStream.title}
+             <video
+               ref={videoRef}
+               src={activeStream.videoUrl || "https://vjs.zencdn.net/v/oceans.mp4"}
+               autoPlay
+               muted={isMuted}
+               playsInline
+               loop
+               onTimeUpdate={(e) => {
+                  const time = e.target.currentTime;
+                  // Heartbeat Sync: Update global context every 5 seconds
+                  // SHIELD: Ignore time < 1 to prevent Mount-Zero wipe
+                  if (time > 1 && Math.floor(time) % 5 === 0 && Math.floor(time) !== Math.floor(activeStream?.timestamp || 0)) {
+                     setActiveStream({ ...activeStream, timestamp: time });
+                  }
+               }}
+               onLoadedMetadata={() => {
+                  if (activeStream?.timestamp && videoRef.current) {
+                     videoRef.current.currentTime = activeStream.timestamp;
+                  }
+               }}
                className={`w-full h-full object-cover transition-all duration-500 ${isPaused ? 'grayscale' : ''}`}
              />
              
@@ -93,12 +149,15 @@ export default function PipOverlay() {
              </h4>
              <div className="flex items-center justify-between mt-1">
                 <p className="text-[10px] font-bold text-neutral-500">{activeStream.creator}</p>
-                <div className="flex items-center gap-2 text-neutral-500">
-                   <Volume2 className="w-3 h-3" />
+                <button 
+                   onClick={() => setIsMuted(!isMuted)}
+                   className="flex items-center gap-2 text-neutral-500 hover:text-indigo-500 transition-colors"
+                >
+                   {isMuted ? <VolumeX className="w-3 h-3 text-rose-500" /> : <Volume2 className="w-3 h-3 text-indigo-500" />}
                    <div className="w-12 h-1 bg-neutral-200 dark:bg-white/10 rounded-full overflow-hidden">
-                      <div className="w-2/3 h-full bg-indigo-500" />
+                      <div className={`h-full bg-indigo-500 transition-all ${isMuted ? 'w-0' : 'w-2/3'}`} />
                    </div>
-                </div>
+                </button>
              </div>
           </div>
         </div>

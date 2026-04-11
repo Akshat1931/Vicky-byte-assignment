@@ -7,6 +7,7 @@ import {
    Play, Pause, Volume2, VolumeX, FastForward
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
+import { useStreaming } from '../../context/StreamingContext';
 
 const QUALITY_OPTIONS = ['Auto', '1080p', '720p', '480p', '360p'];
 const SPEED_OPTIONS = ['0.5x', '0.75x', '1x', '1.25x', '1.5x', '2x'];
@@ -23,6 +24,8 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
    const { theme } = useContext(ThemeContext);
    const isDark = theme === 'dark';
    const videoRef = useRef(null);
+   const lastSyncedTime = useRef(0);
+   const { activeStream, setActiveStream } = useStreaming();
 
    // Elite Media State
    const [isPlaying, setIsPlaying] = useState(true);
@@ -46,6 +49,29 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
    const [playPauseHUD, setPlayPauseHUD] = useState({ visible: false, type: 'play' });
    const [isVolumeDragging, setIsVolumeDragging] = useState(false);
    const [showMobileVolume, setShowMobileVolume] = useState(false);
+   const seekRetryCount = useRef(0);
+
+   const performSecureSeek = useCallback((targetTime) => {
+      if (!videoRef.current || isNaN(targetTime)) return;
+      
+      try {
+         console.log(`[EliteSync] Attempting Seek to ${targetTime}s (Attempt ${seekRetryCount.current + 1})`);
+         videoRef.current.currentTime = targetTime;
+         lastSyncedTime.current = targetTime;
+         
+         // Verify after a short delay if the seek 'stuck'
+         setTimeout(() => {
+            if (videoRef.current && Math.abs(videoRef.current.currentTime - targetTime) > 2 && seekRetryCount.current < 3) {
+               seekRetryCount.current++;
+               performSecureSeek(targetTime);
+            } else {
+               seekRetryCount.current = 0; // Reset on success
+            }
+         }, 200);
+      } catch (err) {
+         console.error("[EliteSync] Seek failed, retrying...", err);
+      }
+   }, [activeStream?.id]);
 
    const triggerHUD = (type, value) => {
       setHud({ type, value, visible: true });
@@ -76,7 +102,25 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
             });
          }
       }
-   }, [event.videoUrl]);
+
+      // CLEANUP: Save timestamp when navigating away for PiP to pick up
+      return () => {
+         if (videoRef.current && videoRef.current.currentTime > 0) {
+            const currentTime = videoRef.current.currentTime;
+            setActiveStream(prev => prev ? { ...prev, timestamp: currentTime } : null);
+         }
+      };
+   }, [event.videoUrl, event.id, setActiveStream]);
+
+   // Metadata-Safe Reactive Seek: Only jump once video is seekable with retry fallback
+   useEffect(() => {
+      if (videoRef.current && duration > 0 && activeStream?.id === event.id && activeStream?.timestamp) {
+         const diff = Math.abs(videoRef.current.currentTime - activeStream.timestamp);
+         if (diff > 1 && lastSyncedTime.current !== activeStream.timestamp) {
+            performSecureSeek(activeStream.timestamp);
+         }
+      }
+   }, [duration, activeStream?.timestamp, event.id, performSecureSeek]);
 
    const handleManualPlay = () => {
       if (videoRef.current) {
@@ -439,10 +483,34 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
             src={event.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4'}
             autoPlay
             playsInline
-            onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
-            onLoadedMetadata={(e) => setDuration(e.target.duration)}
+            onTimeUpdate={(e) => {
+               const time = e.target.currentTime;
+               // NaN Shield: Ensure we don't divide by zero/null duration
+               const currentDuration = e.target.duration || 0;
+               if (currentDuration > 0) {
+                  setProgress((time / currentDuration) * 100);
+               }
+               
+               // Heartbeat Sync: Update global context every 5 seconds
+               // SHIELD: Ignore time < 1 to prevent Mount-Zero wipe
+               if (time > 1 && Math.floor(time) % 5 === 0 && Math.floor(time) !== Math.floor(activeStream?.timestamp || 0)) {
+                  setActiveStream({ ...event, timestamp: time });
+               }
+            }}
+            onLoadedMetadata={(e) => {
+               setDuration(e.target.duration);
+               // Immediate fallback sync for fast-loading streams
+               if (activeStream?.id === event.id && activeStream?.timestamp && e.target.duration > 0) {
+                  performSecureSeek(activeStream.timestamp);
+               }
+            }}
             onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
+            onPause={() => {
+               setIsPlaying(false);
+               if (videoRef.current) {
+                  setActiveStream({ ...event, timestamp: videoRef.current.currentTime });
+               }
+            }}
          >
             <source src={event.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4'} type="video/mp4" />
          </video>
