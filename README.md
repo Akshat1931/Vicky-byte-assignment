@@ -21,7 +21,7 @@ StreamSphere is a high-fidelity frontend execution of a modern live-streaming pl
 
 | 💬 Community Lounge | 📺 Content Continuity |
 | :--- | :--- |
-| <video src="./chat_reel.mp4" width="100%" controls muted loop></video> | <video src="./pip_reel.mp4" width="100%" controls muted loop></video> |
+| [![Chat Demo](https://img.youtube.com/vi/dvr-cXaOn8A/maxresdefault.jpg)](https://www.youtube.com/watch?v=dvr-cXaOn8A) | [![PiP Demo](https://img.youtube.com/vi/abT9glVJmtg/maxresdefault.jpg)](https://www.youtube.com/watch?v=abT9glVJmtg) |
 | **Real-time Chat Interaction** | **Global Picture-in-Picture (PiP)** |
 
 ---
