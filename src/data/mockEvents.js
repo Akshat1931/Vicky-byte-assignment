@@ -11,6 +11,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 124500,
     likes: 4520,
+    videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     description: 'The biggest e-sports event of the year. Top teams from around the world battle it out for a $5M prize pool.',
     previewMessage: 'Quarterfinal just started - Team Nova is already up by 2 rounds.'
   },
@@ -24,6 +25,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 830,
+    videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     description: 'A deep dive into the next generation of artificial intelligence, featuring top industry leaders.',
     previewMessage: 'Guest lineup includes founders from 3 AI unicorn startups.'
   },
@@ -37,6 +39,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 32000,
     likes: 12400,
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     description: 'Experience an audiovisual journey with DJ Synth, live from Tokyo.',
     previewMessage: 'Visual set change in 10 minutes with an exclusive unreleased track.'
   },
@@ -50,6 +53,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 1560,
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/dog.mp4',
     description: 'Watch the best speedrunners break records across nostalgic titles and modern hits.'
   },
   {
@@ -62,6 +66,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 720,
+    videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     description: 'Live art creation from talented street artists pushing boundaries.'
   },
   {
@@ -74,6 +79,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 850000,
     likes: 34000,
+    videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     description: 'The highly anticipated Game 7 of the finals. Winner takes all.',
     previewMessage: 'Final quarter is live - a 3-point game with 02:11 left.'
   },
@@ -87,6 +93,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 2100,
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     description: 'Learn how to build stunning UI experiences using React and Framer Motion.'
   },
   {
@@ -99,6 +106,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 5400,
+    videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     description: 'Live coverage from the red carpet of the biggest night in music.'
   },
   {
@@ -111,6 +119,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 12050,
     likes: 890,
+    videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     description: 'Innovative startups pitch their ideas to top investors.',
     previewMessage: 'Next founder is pitching climate-tech analytics in 2 minutes.'
   },
@@ -124,6 +133,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 2340,
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     description: 'Downhill mountain biking through the treacherous Alps.'
   },
   {
@@ -136,6 +146,7 @@ export const mockEvents = [
     isLive: false,
     viewers: 0,
     likes: 4100,
+    videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     description: 'An elegant evening featuring classics from Mozart and Beethoven.'
   },
   {
@@ -148,6 +159,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 8500,
     likes: 3100,
+    videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     description: 'Discover the next big indie games before they hit the market.',
     previewMessage: 'Developer AMA starts right after the gameplay reveal.'
   },
@@ -185,6 +197,7 @@ export const mockEvents = [
     isLive: true,
     viewers: 154000,
     likes: 8900,
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     description: 'The battle for the World Chess Champion title.',
     previewMessage: 'Commentators are calling this one of the best endgames this year.'
   },

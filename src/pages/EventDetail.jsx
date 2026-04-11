@@ -15,6 +15,7 @@ export default function EventDetail() {
   const { id } = useParams();
   const event = mockEvents.find((e) => e.id === id);
   const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [theaterMode, setTheaterMode] = useState(false);
   
   const { setActiveStream } = useStreaming();
   
@@ -38,8 +39,10 @@ export default function EventDetail() {
   if (!event) return <Navigate to="/" replace />;
 
   return (
-    <div className={`app-container relative transition-all duration-300 ${
-      isPiPActive ? 'py-0' : 'py-4 sm:py-6 lg:py-8'
+    <div className={`relative transition-all duration-500 ${
+      theaterMode ? 'w-full max-w-none px-0' : 'app-container'
+    } ${
+      isPiPActive ? 'py-0' : theaterMode ? 'pt-0 pb-12' : 'py-4 sm:py-6 lg:py-8'
     }`}>
       <SEO 
         title={event.title} 
@@ -52,16 +55,23 @@ export default function EventDetail() {
         <div
           className={`
             order-1
-            ${chatCollapsed
-              ? 'lg:col-start-1 lg:col-span-12'
-              : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
+            ${theaterMode 
+              ? 'lg:col-span-12 overflow-hidden' 
+              : chatCollapsed
+                ? 'lg:col-start-1 lg:col-span-12'
+                : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
             lg:row-start-1 min-w-0 relative transition-all duration-500
           `}
         >
           {/* GHOST PLACEHOLDER: accounts for the video space when fixed at top */}
           <div className={`hidden max-lg:block transition-all duration-300 ${isPiPActive ? 'aspect-video w-full' : 'h-0 opacity-0'}`} />
 
-          <VideoPlayer event={event} isPiPActive={isPiPActive} />
+          <VideoPlayer 
+            event={event} 
+            isPiPActive={isPiPActive} 
+            theaterMode={theaterMode}
+            setTheaterMode={setTheaterMode}
+          />
 
           <AnimatePresence>
             {chatCollapsed && !isPiPActive && (
@@ -83,9 +93,9 @@ export default function EventDetail() {
           <aside
             className={`
               order-2
-              lg:col-start-9 xl:col-start-10
-              lg:col-span-4 xl:col-span-3
-              lg:row-start-1 lg:row-span-2
+              ${theaterMode
+                ? 'lg:col-span-4 lg:col-start-9 lg:row-start-2'
+                : 'lg:col-start-9 xl:col-start-10 lg:col-span-4 xl:col-span-3 lg:row-start-1 lg:row-span-2'}
               min-w-0 self-start lg:sticky lg:top-20 xl:top-24 z-10 transition-all duration-500
             `}
           >
@@ -100,9 +110,11 @@ export default function EventDetail() {
         <div
           className={`
             order-3
-            ${chatCollapsed
-              ? 'lg:col-start-1 lg:col-span-12'
-              : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
+            ${theaterMode
+              ? 'lg:col-span-8 lg:col-start-1 lg:row-start-2'
+              : chatCollapsed
+                ? 'lg:col-start-1 lg:col-span-12'
+                : 'lg:col-start-1 lg:col-span-8 xl:col-span-9'}
             lg:row-start-2 min-w-0 space-y-4 sm:space-y-5 transition-all duration-500
             ${isPiPActive ? 'opacity-30 blur-[2px] pointer-events-none' : ''}
           `}
