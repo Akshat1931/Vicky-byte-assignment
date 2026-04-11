@@ -79,7 +79,7 @@ export default function EventDetail() {
                 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={() => setChatCollapsed(false)}
-                className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-black/50 hover:bg-black/80 backdrop-blur-md text-white px-3 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-medium transition-colors"
+                className="absolute top-16 right-4 z-50 flex items-center gap-2 bg-black/50 hover:bg-black/80 backdrop-blur-md text-white px-3 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-medium transition-colors"
               >
                 <MessageSquarePlus className="w-4 h-4" />
                 <span className="hidden sm:block">Expand Chat</span>
