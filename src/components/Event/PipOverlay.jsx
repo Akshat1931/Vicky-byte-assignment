@@ -12,7 +12,14 @@ export default function PipOverlay() {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(() => {
+     try {
+        return Number(localStorage.getItem('ss-volume')) || 0.8;
+     } catch {
+        return 0.8;
+     }
+  });
+  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
   const lastSyncedTime = useRef(0);
   
@@ -55,6 +62,27 @@ export default function PipOverlay() {
       else videoRef.current.play().catch(() => {});
     }
   }, [isPaused, isVisible]);
+
+  // Sync Volume/Mute with hardware
+  useEffect(() => {
+     if (videoRef.current) {
+        videoRef.current.volume = volume;
+        videoRef.current.muted = isMuted;
+     }
+  }, [volume, isMuted]);
+
+  const handleVolumeChange = (newVal) => {
+     const val = parseFloat(newVal);
+     setVolume(val);
+     if (val > 0) setIsMuted(false);
+     else if (val === 0) setIsMuted(true);
+     
+     try {
+        localStorage.setItem('ss-volume', val);
+     } catch (e) {
+        console.warn("Storage blocked, volume will not persist across sessions", e);
+     }
+  };
 
   if (!isVisible || !activeStream) return null;
 
@@ -147,17 +175,37 @@ export default function PipOverlay() {
              }`}>
                 {activeStream.title}
              </h4>
-             <div className="flex items-center justify-between mt-1">
-                <p className="text-[10px] font-bold text-neutral-500">{activeStream.creator}</p>
-                <button 
-                   onClick={() => setIsMuted(!isMuted)}
-                   className="flex items-center gap-2 text-neutral-500 hover:text-indigo-500 transition-colors"
-                >
-                   {isMuted ? <VolumeX className="w-3 h-3 text-rose-500" /> : <Volume2 className="w-3 h-3 text-indigo-500" />}
-                   <div className="w-12 h-1 bg-neutral-200 dark:bg-white/10 rounded-full overflow-hidden">
-                      <div className={`h-full bg-indigo-500 transition-all ${isMuted ? 'w-0' : 'w-2/3'}`} />
+             <div className="flex items-center gap-2 mt-1">
+                <p className="text-[10px] font-bold text-neutral-500 mr-auto">{activeStream.creator}</p>
+                
+                <div className="flex items-center gap-2 group/vol">
+                   <button 
+                      onClick={() => setIsMuted(!isMuted)}
+                      className="text-neutral-500 hover:text-indigo-500 transition-colors"
+                   >
+                      {(isMuted || volume === 0) ? <VolumeX className="w-3 h-3 text-rose-500" /> : <Volume2 className="w-3 h-3 text-indigo-500" />}
+                   </button>
+                   
+                   <div className="relative w-16 h-4 flex items-center">
+                      {/* Custom Slider Track */}
+                      <div className="absolute inset-0 top-1/2 -translate-y-1/2 h-1 bg-neutral-200 dark:bg-white/10 rounded-full overflow-hidden">
+                         <div 
+                            className={`h-full bg-indigo-500 transition-all ${isMuted ? 'w-0' : ''}`} 
+                            style={{ width: isMuted ? '0%' : `${volume * 100}%` }}
+                         />
+                      </div>
+                      {/* Transparent Range Input Overlay */}
+                      <input 
+                         type="range"
+                         min="0"
+                         max="1"
+                         step="0.01"
+                         value={isMuted ? 0 : volume}
+                         onChange={(e) => handleVolumeChange(e.target.value)}
+                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer accent-indigo-500"
+                      />
                    </div>
-                </button>
+                </div>
              </div>
           </div>
         </div>
