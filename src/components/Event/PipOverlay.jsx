@@ -93,9 +93,16 @@ export default function PipOverlay() {
           {/* Header / Controls */}
           <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20 bg-gradient-to-b from-black/60 to-transparent">
              <button 
-                onClick={() => setActiveStream(null)}
+                onClick={() => {
+                   const isEventPage = location.pathname.startsWith('/event/');
+                   if (isEventPage && isManualPiP) {
+                      setIsManualPiP(false);
+                   } else {
+                      setActiveStream(null);
+                   }
+                }}
                 className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-rose-500 transition-all"
-                title="Dismiss PiP"
+                title={location.pathname.startsWith('/event/') && isManualPiP ? "Restore Player" : "Dismiss Stream"}
              >
                 <X className="w-4 h-4" />
              </button>

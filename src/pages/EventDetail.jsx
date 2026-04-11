@@ -100,6 +100,7 @@ export default function EventDetail() {
             `}
           >
             <LiveChat 
+              event={event}
               onCollapse={() => setChatCollapsed(true)} 
               onFocusChange={(focused) => setIsPiPActive(focused && window.innerWidth < 1024)}
             />

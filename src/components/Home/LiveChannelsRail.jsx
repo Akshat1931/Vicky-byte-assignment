@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ArrowUpDown, Settings, Compass, Users, LayoutDashboard, User, CreditCard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, Settings, Compass, Users, LayoutDashboard, User, CreditCard, SortAsc } from 'lucide-react';
 import { mockEvents, CATEGORIES } from '../../data/mockEvents';
 
 const AVATAR_COLORS = [
@@ -115,9 +115,18 @@ const ChannelRow = memo(({ event, collapsed, isLive }) => {
 export default function LiveChannelsRail({ collapsed, onToggle }) {
   const [showMoreFollowed, setShowMoreFollowed] = useState(false);
   const [showMoreLive, setShowMoreLive] = useState(false);
+  const [followedSort, setFollowedSort] = useState('default'); // 'default' or 'az'
 
   const liveEvents = mockEvents.filter(e => e.isLive);
-  const visibleFollowed = showMoreFollowed ? FOLLOWED : FOLLOWED.slice(0, 4);
+
+  const sortedFollowed = useMemo(() => {
+    if (followedSort === 'az') {
+      return [...FOLLOWED].sort((a, b) => a.creator.localeCompare(b.creator));
+    }
+    return FOLLOWED;
+  }, [followedSort]);
+
+  const visibleFollowed = showMoreFollowed ? sortedFollowed : sortedFollowed.slice(0, 4);
   const visibleLive = showMoreLive ? liveEvents : liveEvents.slice(0, 5);
 
   const catViewers = CATEGORIES.filter(c => c !== 'All').map(cat => ({
@@ -162,7 +171,23 @@ export default function LiveChannelsRail({ collapsed, onToggle }) {
           {/* ── FOLLOWED CHANNELS ── */}
           <section>
             <SectionLabel label="Followed Channels" collapsed={collapsed}
-              rightEl={<button className="text-neutral-600 hover:text-neutral-300 transition-colors"><ArrowUpDown className="w-3 h-3" /></button>} />
+              rightEl={
+                <button 
+                  onClick={() => setFollowedSort(prev => prev === 'default' ? 'az' : 'default')}
+                  className={`transition-all duration-300 p-1 rounded-md hover:bg-white/5 ${followedSort === 'az' ? 'text-indigo-400' : 'text-neutral-600 hover:text-neutral-300'}`}
+                  title={followedSort === 'az' ? "Sorting by Creator (A-Z)" : "Showing Default Order"}
+                >
+                  <motion.div
+                    key={followedSort}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {followedSort === 'az' ? <SortAsc className="w-3.5 h-3.5" /> : <ArrowUpDown className="w-3.5 h-3.5" />}
+                  </motion.div>
+                </button>
+              } 
+            />
             {visibleFollowed.map(ev => (
               <ChannelRow key={ev.id || ev.creator} event={ev} collapsed={collapsed} isLive={false} />
             ))}

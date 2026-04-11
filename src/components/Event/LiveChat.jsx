@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const COMMON_EMOJIS = ['😂', '❤️', '🔥', '👍', '👋', '🎉', '😮', '💯', '✨', '🙌'];
 
-export default function LiveChat({ onCollapse, onFocusChange }) {
+export default function LiveChat({ event, onCollapse, onFocusChange }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const [messages, setMessages] = useState([]);
@@ -178,10 +178,29 @@ export default function LiveChat({ onCollapse, onFocusChange }) {
       <div 
         ref={messageContainerRef} 
         onScroll={onMessagesScroll}
-        className={`flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 scrollbar-hide ${isLight ? 'bg-white' : 'bg-[#0a0a0f]'} ${
+        className={`flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 scrollbar-hide relative ${isLight ? 'bg-white' : 'bg-[#0a0a0f]'} ${
           mobileFeedOpen ? 'block' : 'hidden md:block'
         }`}
       >
+        {/* ── Pre-show Context Banner ── */}
+        {event && !event.isLive && (
+           <motion.div 
+             initial={{ opacity: 0, y: -20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className={`sticky top-0 z-20 mb-4 p-3 rounded-xl border backdrop-blur-md flex items-center gap-3 shadow-xl ${
+                isLight ? 'bg-indigo-50/90 border-indigo-100 flex-col items-start' : 'bg-indigo-500/10 border-indigo-500/20 flex-col items-start'
+             }`}
+           >
+              <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                 <span className={`text-[10px] font-black uppercase tracking-widest ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>Pre-show Lounge Active</span>
+              </div>
+              <p className={`text-[11px] leading-snug ${isLight ? 'text-indigo-900/60 font-medium' : 'text-indigo-100/60 font-medium'}`}>
+                 The official broadcast for <span className="text-indigo-500 font-bold">"{event.title}"</span> is scheduled to start at <span className="underline decoration-indigo-500/50 underline-offset-2">{event.schedule}</span>.
+              </p>
+           </motion.div>
+        )}
+
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <motion.div 

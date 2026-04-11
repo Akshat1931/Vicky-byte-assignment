@@ -4,7 +4,8 @@ import {
    Settings, Signal, Gauge, Radio, Sparkles, X, 
    Captions, Zap, PlayCircle, Theater, Smile, 
    Flame, Laugh, Heart as HeartIcon, Star, Maximize,
-   Play, Pause, Volume2, VolumeX, FastForward, MonitorPlay
+   Play, Pause, Volume2, VolumeX, FastForward, MonitorPlay,
+   Loader2, Share2, CheckCircle2
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useStreaming } from '../../context/StreamingContext';
@@ -51,6 +52,7 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
 
    // HUD Overlay State
    const [hud, setHud] = useState({ type: null, value: null, visible: false });
+   const [isBuffering, setIsBuffering] = useState(true);
 
    const [settingsOpen, setSettingsOpen] = useState(false);
    const [emoteMenuOpen, setEmoteMenuOpen] = useState(false);
@@ -263,6 +265,78 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
          document.exitFullscreen();
       }
    };
+
+   const [reminderSet, setReminderSet] = useState(false);
+   const [isShared, setIsShared] = useState(false);
+
+   const handleShare = () => {
+      setIsShared(true);
+      setTimeout(() => setIsShared(false), 2000);
+   };
+
+   // SCHEDULED (UPCOMING) WAITING ROOM: Must be the last logic before final render
+   if (!event.isLive && !isManualPiP) {
+      return (
+         <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className={`w-full aspect-video rounded-3xl border flex flex-col items-center justify-center p-8 text-center transition-colors relative overflow-hidden ${
+               isDark ? 'bg-[#0a0c10] border-white/10' : 'bg-slate-50 border-slate-200'
+            }`}
+         >
+            {/* Ambient Background Poster */}
+            <div className="absolute inset-0 opacity-40">
+               <img src={event.imageUrl} className="w-full h-full object-cover blur-2xl scale-110" alt="" />
+               <div className={`absolute inset-0 ${isDark ? 'bg-black/60' : 'bg-white/40'}`} />
+            </div>
+
+            <div className="relative z-10 max-w-lg mx-auto flex flex-col items-center gap-6">
+               <div className="px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 text-[10px] font-black uppercase tracking-[0.2em]">
+                  Scheduled Broadcast
+               </div>
+
+               <div className="space-y-3">
+                  <h2 className={`text-2xl sm:text-3xl font-black tracking-tight leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                     {event.title}
+                  </h2>
+                  <p className="text-sm text-neutral-500 font-medium">with <span className="text-indigo-500">{event.creator}</span></p>
+               </div>
+
+               <div className={`p-6 rounded-2xl border backdrop-blur-md flex flex-col items-center gap-2 min-w-[240px] ${
+                  isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-slate-200 shadow-sm'
+               }`}>
+                  <span className="text-[10px] uppercase font-black tracking-widest text-neutral-500">Starting At</span>
+                  <span className={`text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>{event.schedule}</span>
+               </div>
+
+               <div className="flex flex-wrap items-center justify-center gap-4">
+                  <button 
+                     onClick={() => setReminderSet(!reminderSet)}
+                     className={`px-8 py-3 rounded-full font-bold text-sm transition-all shadow-lg flex items-center gap-2 ${
+                        reminderSet 
+                        ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                        : 'bg-indigo-500 text-white hover:bg-indigo-400'
+                     }`}
+                  >
+                     {reminderSet ? <Sparkles className="w-4 h-4" /> : <Signal className="w-4 h-4" />}
+                     {reminderSet ? 'Reminder Set!' : 'Set Reminder'}
+                  </button>
+                  <button 
+                     onClick={handleShare}
+                     className={`px-6 py-3 rounded-full font-bold text-sm border transition-all flex items-center gap-2 ${
+                        isShared 
+                        ? 'bg-indigo-500/10 border-indigo-500/50 text-indigo-400' 
+                        : isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
+                     }`}
+                  >
+                     {isShared ? <CheckCircle2 className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                     {isShared ? 'Link Copied!' : 'Share Event'}
+                  </button>
+               </div>
+            </div>
+         </motion.div>
+      );
+   }
 
    // MINI-PLAYER PLACEHOLDER SWAP: Must be the last logic before final render to avoid hook violations
    if (isManualPiP) {
@@ -704,9 +778,41 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
                }
             }}
             onEnded={handleVideoEnd}
+            onWaiting={() => setIsBuffering(true)}
+            onPlaying={() => setIsBuffering(false)}
+            onCanPlay={() => setIsBuffering(false)}
+            onLoadStart={() => setIsBuffering(true)}
+            poster={event.imageUrl}
          >
             <source src={event.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4'} type="video/mp4" />
          </video>
+
+         {/* ── Cinematic Loader Overlay ── */}
+         <AnimatePresence>
+            {isBuffering && !isAutoPlaying && (
+               <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-black/40 backdrop-blur-md"
+               >
+                  <div className="relative">
+                     <div className="w-20 h-20 rounded-full border-2 border-white/10 flex items-center justify-center">
+                        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                     </div>
+                     <motion.div 
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl"
+                     />
+                  </div>
+                  <div className="mt-6 text-center">
+                     <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white drop-shadow-lg">Connecting to Stream</h3>
+                     <p className="text-[10px] text-white/60 font-medium mt-1 uppercase tracking-widest">Optimizing Playback Architecture</p>
+                  </div>
+               </motion.div>
+            )}
+         </AnimatePresence>
       </motion.div>
    );
 }
