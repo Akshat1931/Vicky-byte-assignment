@@ -6,6 +6,7 @@ export function StreamingProvider({ children }) {
   const [hiddenIds, setHiddenIds] = useState([]);
   const [undoData, setUndoData] = useState(null);
   const [activeStream, setActiveStreamState] = useState(null);
+  const [isManualPiP, setIsManualPiP] = useState(false);
   
   // GLOBAL AUDIO STATE: Master source of truth for all players
   const [volume, setVolumeState] = useState(() => {
@@ -77,11 +78,13 @@ export function StreamingProvider({ children }) {
     setUndoData,
     activeStream,
     setActiveStream,
+    isManualPiP,
+    setIsManualPiP,
     volume,
     isMuted,
     setGlobalVolume,
     setGlobalMuted
-  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream, setActiveStream, volume, isMuted, setGlobalVolume, setGlobalMuted]);
+  }), [hiddenIds, hideEvent, restoreEvent, undoData, activeStream, setActiveStream, isManualPiP, volume, isMuted, setGlobalVolume, setGlobalMuted]);
 
   return (
     <StreamingContext.Provider value={value}>

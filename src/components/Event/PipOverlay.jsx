@@ -9,6 +9,7 @@ export default function PipOverlay() {
   const { theme } = useContext(ThemeContext);
   const { 
     activeStream, setActiveStream, 
+    isManualPiP, setIsManualPiP,
     volume, setGlobalVolume, 
     isMuted, setGlobalMuted 
   } = useStreaming();
@@ -21,10 +22,12 @@ export default function PipOverlay() {
   
   const isLight = theme === 'light';
 
-  // Logic: Show PiP only when NOT on an event detail page AND a stream is active
+  // Logic: Show PiP only when NOT on an event detail page (OR manual PiP is active) AND a stream is active
   useEffect(() => {
     const isEventPage = location.pathname.startsWith('/event/');
-    if (!isEventPage && activeStream) {
+    const shouldShow = (!isEventPage && activeStream) || (isEventPage && isManualPiP && activeStream);
+
+    if (shouldShow) {
       setIsVisible(true);
     } else {
       if (isVisible) {
@@ -37,7 +40,7 @@ export default function PipOverlay() {
         }
       }
     }
-  }, [location.pathname, activeStream, isVisible]);
+  }, [location.pathname, activeStream, isManualPiP, isVisible]);
 
   // Reactive Seek: Sync PiP with actual timestamp as it arrives
   useEffect(() => {
@@ -102,6 +105,7 @@ export default function PipOverlay() {
                       const currentTime = videoRef.current.currentTime;
                       setActiveStream(prev => prev ? { ...prev, timestamp: currentTime } : null);
                    }
+                   setIsManualPiP(false);
                    setIsVisible(false);
                    navigate(`/event/${activeStream.id}`);
                  }}

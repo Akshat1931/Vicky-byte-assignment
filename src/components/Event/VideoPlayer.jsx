@@ -4,7 +4,7 @@ import {
    Settings, Signal, Gauge, Radio, Sparkles, X, 
    Captions, Zap, PlayCircle, Theater, Smile, 
    Flame, Laugh, Heart as HeartIcon, Star, Maximize,
-   Play, Pause, Volume2, VolumeX, FastForward
+   Play, Pause, Volume2, VolumeX, FastForward, MonitorPlay
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useStreaming } from '../../context/StreamingContext';
@@ -33,6 +33,7 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
 
    const { 
       activeStream, setActiveStream, 
+      isManualPiP, setIsManualPiP,
       volume, setGlobalVolume, 
       isMuted, setGlobalMuted 
    } = useStreaming();
@@ -263,6 +264,42 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
       }
    };
 
+   // MINI-PLAYER PLACEHOLDER SWAP: Must be the last logic before final render to avoid hook violations
+   if (isManualPiP) {
+      return (
+         <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`w-full aspect-video rounded-3xl border flex flex-col items-center justify-center p-8 text-center transition-colors relative overflow-hidden group ${
+               isDark ? 'bg-black/40 border-white/10' : 'bg-slate-50 border-slate-200 shadow-inner'
+            }`}
+         >
+            {/* Ambient Background */}
+            <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700">
+               <img src={event.imageUrl} className="w-full h-full object-cover blur-3xl scale-125" alt="" />
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center gap-6">
+               <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-500 border border-indigo-500/30">
+                  <MonitorPlay className="w-10 h-10" />
+               </div>
+               
+               <div className="space-y-2">
+                  <h3 className={`text-xl font-black uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-800'}`}>Playing in Miniplayer</h3>
+                  <p className="text-sm text-neutral-500 font-medium">Continue watching in the corner while you explore</p>
+               </div>
+
+               <button 
+                  onClick={() => setIsManualPiP(false)}
+                  className="px-8 py-3 rounded-full bg-indigo-500 text-white font-bold text-sm hover:bg-indigo-400 hover:scale-105 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+               >
+                  <Maximize className="w-4 h-4" /> Expand Video
+               </button>
+            </div>
+         </motion.div>
+      );
+   }
+
    // Sticky Overlay classes for mobile PiP mode - snap to ABSOLUTE TOP (top-0)
    const pipClasses = isPiPActive 
       ? `fixed top-0 left-0 w-full z-[130] rounded-none shadow-[0_15px_30px_rgba(0,0,0,0.6)] border-b transition-all duration-300 ${isDark ? 'border-white/10' : 'border-slate-200'}` 
@@ -324,9 +361,16 @@ export default function VideoPlayer({ event, isPiPActive, theaterMode, setTheate
             </AnimatePresence>
          </div>
 
-         {/* ── Top-Right Utility Cluster (RESTORED) ── */}
+         {/* ── Top-Right Utility Cluster ── */}
          <div className="absolute top-4 right-4 z-40 flex items-center gap-2">
             <div className={`flex items-center gap-2 transition-opacity duration-300 ${isPiPActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+               <button
+                  onClick={(e) => { e.stopPropagation(); setIsManualPiP(true); }}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all outline-none hover:scale-110 active:scale-95`}
+                  title="Miniplayer (PiP)"
+               >
+                  <MonitorPlay className="w-5 h-5" />
+               </button>
                <button
                   onClick={(e) => { e.stopPropagation(); setSettingsOpen(v => !v); setEmoteMenuOpen(false); }}
                   className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center backdrop-blur-md rounded-full border transition-all outline-none ${
