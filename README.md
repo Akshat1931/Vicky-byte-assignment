@@ -2,7 +2,7 @@
 
 **Live Deployment Link:** [https://vickybytes-stream.vercel.app](https://vickybytes-stream.vercel.app)
 
-> **StreamSphere** is a high-fidelity, professional-grade streaming engine built to solve the most complex challenges in web-based media delivery. It features a "Zero-Latency" PiP architecture, a robust "Persistence Shield" for playback continuity, and a fully dynamic data-bind system that purges all static placeholders for a true production-ready experience.
+> **StreamSphere** is a high-fidelity, professional-grade streaming engine built to solve the most complex challenges in web-based media delivery. It features a "Zero-Latency" PiP architecture, a robust "Persistence Shield" for playback continuity, and a **fully interactive engagement suite** designed for elite digital community experiences.
 
 ---
 
@@ -21,29 +21,28 @@ To prevent "Metadata-Wipe" when components re-mount during navigation:
 
 ### 3. 🔇 Zero-Latency "Ghost Audio" Suppression
 Solving the common SPA bug where background audio continues playing after navigation:
-- **Path-Aware Termination**: Every entry point (Hero, Grid, Suggested) uses a synchronous intercept that purges the active stream *before* the router changes the page.
-- **Path Isolation**: This ensures that navigating to a NEW stream instantly kills the OLD one, providing a zero-clash audio experience.
-
-### 4. 📱 The Mobile Keyboard Guard (Viewport-Aware HUD)
-- **Viewport Snapping**: Specialized logic that detects keyboard events to "snap" the video player to the top of the screen and hide navigation elements, ensuring the chat remains usable in cramped mobile viewports.
+- **Path-Aware Termination**: Every entry point uses a synchronous intercept that purges the active stream *before* the router changes the page, ensuring zero-clash audio transitions.
 
 ---
 
-## 🚀 Key Features
+## ✨ The Interactive Engagement Suite
+*Production-grade feedback and community tools:*
 
-### 🎬 Live-Video PiP Architecture
-- **Active Hand-off**: True live video migration (not static images) between the Main Player and the Glassmorphic Overlay.
-- **Pro HUD**: Integrated dynamic toggles for **Quality (Auto/1080p)**, **Playback Speed (0.5x to 2x)**, and **Latency modes**.
+### 🎬 Super Chat & Linked Tips
+- **Message-Aware Donations**: Integrated a functional **Gift** activator in the live chat. Users can type a message and select a tip amount ($5, $10, $50) to instantly transform their words into a **Gold-Glow Super Chat** message.
+- **Diamond Tier Logic**: Every tip generates a high-fidelity amber-bordered message in the chat feed, ensuring the contributor is the hero of the broadcast.
 
-### 💬 Community Interaction Engine
-- **The Badge Engine**: Founder, Top Fan, and Verified badges with high-rarity rose-gold and fire-glow animations.
-- **Interaction Glow**: Real-time `@You` mention detection that triggers a tactical glow on priority messages.
-- **Auto-Snap Chat**: Smart toast indicators that detect when a user is "out of sync" with live chat, providing a one-click snap-back.
+### 💰 Multi-Step Donation HUD
+- **Flexible Tipping**: The "Donate" button reveals a glassmorphic tier selector ($2 to $20) with an additional **Custom Tip** input field.
+- **Cinematic Conformation**: Successful contributions trigger a celebratory **HypeBurst** and a signature emerald heart pulse, providing immediate tactile confirmation.
 
-### 💎 Cinematic Engineering
-- **3D Tactical Tilt**: Every discovery card features cursor-aware 3D rotation and spring-stiffness scaling.
-- **Adaptive Glassmorphism**: HSL-tailored backdrop blurs (`backdrop-blur-xl`) that create a "Living UI" by picking up colors from the video layer.
-- **NaN-Shielding**: Defensive logic across all progress bars and volume sliders to prevent UI "flicker" during media initialization.
+### 🔄 Global Interaction Sync
+- **Share/Save Handoff**: Standardized the "Success" state across the app. Clicking **Share** or **Save** instantly swaps the icon for a `CheckCircle2` with an **Indigo/Emerald Pulse**, ensuring the user *knows* their action was registered.
+- **Persistent Library State**: The "Save for later" menu item uses a persistent state-lock that keeps the status as "Saved to Library" for the duration of the session.
+
+### 🔊 PiP Volume Precision
+- **Functional Range Slider**: Replaced the static HUD bars with a functional, glassmorphic volume slider. 
+- **Bidirectional Audio Memory**: Any volume change in the PiP window is saved to `localStorage`, allowing the main player to pick up exactly where the user left off.
 
 ---
 
@@ -51,8 +50,8 @@ Solving the common SPA bug where background audio continues playing after naviga
 
 - **React 18**: Custom hooks for media state and theme management.
 - **Framer Motion**: Powering the 3D grid, cinematic HUD transitions, and "Goated" chat entry animations.
-- **Lucide React**: Vector-perfect iconography.
-- **Tailwind CSS**: 100% custom, glassmorphic utility architecture (Zero component libraries used).
+- **Lucide React**: Vector-perfect, production-ready iconography.
+- **Tailwind CSS**: 100% custom, glassmorphic utility architecture.
 
 ---
 
@@ -62,10 +61,10 @@ Solving the common SPA bug where background audio continues playing after naviga
 | :--- | :--- | :--- |
 | **Video Handoff** | Resets or uses stills | **Verify-and-Retry Seek Engine** |
 | **Audio Logic** | Overlapping/Ghost audio | **Synchronous Path-Aware Termination** |
-| **State Sync** | Lost on refresh/Nav | **Heartbeat Persistence Shield** |
-| **PiP HUD** | Basic Play/Pause | **Pro HUD** (Quality, Speed, Mute logic) |
+| **Donations** | Static buttons | **Multi-Step Engine + Custom Tips** |
+| **Super Chat** | Simulated / None | **Message-Linked Gold-Glow Tips** |
+| **UX Sync** | Silent actions (Copied) | **Icon-Swap + Indigo Pulse Feedback** |
 | **Mobile UX** | Player gets covered | **Keyboard-Aware Viewport Snapping** |
-| **Data Flow** | Hard-coded placeholders | **100% Dynamic Data-Bind Architecture** |
 
 ---
 
