@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Users, DollarSign, PlayCircle, Clock, Zap, BarChart3, ArrowUpRight, ArrowDownRight, Video, MessageSquare, Calendar } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, PlayCircle, Clock, Zap, BarChart3, ArrowUpRight, ArrowDownRight, Video, MessageSquare, Calendar, Activity } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import SEO from '../components/Core/SEO';
 import { mockUser } from '../data/mockUser';
@@ -65,20 +65,62 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Stream Manager Preview */}
           <div className="lg:col-span-2 space-y-6">
-             <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14] border-white/5'}`}>
-                <div className="flex items-center justify-between mb-6">
-                   <h3 className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Stream Performance</h3>
-                   <BarChart3 className="w-5 h-5 text-indigo-500" />
+             <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14] border-white/5 shadow-2xl shadow-black/20'}`}>
+                <div className="flex items-center justify-between mb-8">
+                   <div>
+                      <h3 className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Stream Performance</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mt-1">Real-time Engagement Matrix</p>
+                   </div>
+                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-400 text-[10px] font-black tracking-widest uppercase border border-indigo-500/20">
+                      <Activity className="w-3.5 h-3.5" />
+                      Live Analytics
+                   </div>
                 </div>
-                <div className="h-48 flex items-end gap-2 px-2 pb-4">
-                   {[40, 70, 45, 90, 65, 80, 50, 60, 85, 95, 75, 55].map((h, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        className="flex-1 bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-sm opacity-80"
-                      />
-                   ))}
+
+                <div className="relative h-48 mb-10 group pl-16 pr-4 mt-6">
+                   {/* Y-Axis Labels */}
+                   <div className="absolute left-10 inset-y-0 flex flex-col justify-between text-[10px] font-black text-neutral-600 uppercase tracking-widest pr-2 border-r border-white/5 pointer-events-none">
+                      <span>40K</span>
+                      <span>20K</span>
+                      <span>0</span>
+                   </div>
+                   
+                   {/* Y-Axis Name */}
+                   <div className="absolute -left-4 top-1/2 -translate-y-1/2 -rotate-90 text-[8px] font-black text-neutral-500 uppercase tracking-[0.4em] pointer-events-none whitespace-nowrap opacity-40">
+                      Engagement
+                   </div>
+
+                   <div className="relative w-full h-full">
+                      <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 200 140">
+                         <defs>
+                            <linearGradient id="dashGradient" x1="0" y1="0" x2="0" y2="1">
+                               <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+                               <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                            </linearGradient>
+                         </defs>
+                         <path 
+                            d="M 0 125 Q 20 105 40 115 T 80 60 T 120 85 T 160 50 T 200 80 L 200 140 L 0 140 Z" 
+                            fill="url(#dashGradient)"
+                            className="transition-all duration-1000 group-hover:opacity-80"
+                         />
+                         <path 
+                            d="M 0 125 Q 20 105 40 115 T 80 60 T 120 85 T 160 50 T 200 80" 
+                            fill="none" 
+                            stroke="#6366f1" 
+                            strokeWidth="3.5" 
+                            strokeLinecap="round"
+                            className="transition-all duration-1000 group-hover:stroke-indigo-400 drop-shadow-lg"
+                         />
+                      </svg>
+                   </div>
+
+                   {/* X-Axis Labels */}
+                   <div className="absolute -bottom-8 inset-x-0 flex justify-between text-[10px] font-black text-neutral-600 uppercase tracking-[0.2em] pl-16 pr-4">
+                      <span>MON</span>
+                      <span>WED</span>
+                      <span>FRI</span>
+                      <span>SUN</span>
+                   </div>
                 </div>
              </div>
 

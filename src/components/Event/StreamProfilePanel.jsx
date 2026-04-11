@@ -1,10 +1,19 @@
 import { Heart, Link as LinkIcon, Video, Radio, MessagesSquare } from 'lucide-react';
 
 export default function StreamProfilePanel({ event }) {
-  const goalTarget = 980000;
-  const followerBase = 974300;
-  const currentFollowers = followerBase + (event.viewers % 1600);
+  // Production-ready dynamic goals linked to creator metadata
+  const goalTarget = event.followerGoal?.target || 1000000;
+  const currentFollowers = event.followerGoal?.current || 980000;
   const progress = Math.min(100, Math.round((currentFollowers / goalTarget) * 100));
+
+  const SocialIcon = ({ platform }) => {
+    switch (platform) {
+      case 'YouTube': return <Video className="h-3.5 w-3.5" />;
+      case 'Twitch': return <Radio className="h-3.5 w-3.5" />;
+      case 'Discord': return <MessagesSquare className="h-3.5 w-3.5" />;
+      default: return <LinkIcon className="h-3.5 w-3.5" />;
+    }
+  };
 
   return (
     <section className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -26,22 +35,18 @@ export default function StreamProfilePanel({ event }) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <a className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 transition-colors" href="#">
-            <LinkIcon className="h-3.5 w-3.5" />
-            All Links
-          </a>
-          <a className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 transition-colors" href="#">
-            <Video className="h-3.5 w-3.5" />
-            YouTube
-          </a>
-          <a className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 transition-colors" href="#">
-            <Radio className="h-3.5 w-3.5" />
-            Twitch
-          </a>
-          <a className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 transition-colors" href="#">
-            <MessagesSquare className="h-3.5 w-3.5" />
-            Discord
-          </a>
+          {event.socialLinks ? event.socialLinks.map(link => (
+            <a key={link.platform} 
+               href={link.url}
+               target="_blank"
+               rel="noopener noreferrer"
+               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 transition-colors">
+              <SocialIcon platform={link.platform} />
+              {link.platform}
+            </a>
+          )) : (
+            <span className="text-xs text-neutral-500 italic">No social links provided</span>
+          )}
         </div>
       </div>
 
@@ -58,8 +63,8 @@ export default function StreamProfilePanel({ event }) {
           {currentFollowers.toLocaleString()} / {goalTarget.toLocaleString()}
         </p>
 
-        <button className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-neutral-100 hover:bg-white/10 transition-colors">
-          <Heart className="h-4 w-4" />
+        <button className="mt-4 w-full justify-center inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-neutral-100 hover:bg-white/10 transition-colors shadow-lg">
+          <Heart className="h-4 w-4 text-rose-500 fill-rose-500" />
           Follow Creator
         </button>
       </div>

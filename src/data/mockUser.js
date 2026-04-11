@@ -10,8 +10,16 @@ export const mockUser = {
     { label: 'Followers', value: '12.4K', change: '+12%', trend: 'up' },
     { label: 'Following', value: '842', change: '+5', trend: 'up' },
     { label: 'Total Views', value: '1.2M', change: '+150K', trend: 'up' },
-    { label: 'Revenue', value: '$4,290', change: '-5%', trend: 'down' },
     { label: 'Streams', value: '156', change: '+8', trend: 'up' },
+  ],
+  followerGoal: {
+    current: 12400,
+    target: 15000,
+  },
+  socialLinks: [
+    { platform: 'Twitter', url: 'https://twitter.com/vickybytes', icon: 'Twitter' },
+    { platform: 'Discord', url: 'https://discord.gg/vickybytes', icon: 'MessageSquare' },
+    { platform: 'GitHub', url: 'https://github.com/vickybytes', icon: 'Github' }
   ],
   recentStreams: [
     { id: 'rs1', title: 'Late Night Coding: React Deep Dive', views: '12.4K', date: '2 days ago', thumbnail: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=2031&auto=format&fit=crop' },

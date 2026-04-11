@@ -14,7 +14,7 @@ export default function SuggestedEvents({ currentEventId }) {
         <p className="text-xs text-neutral-400 uppercase tracking-[0.14em]">Up Next</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {suggested.map((event) => (
           <Link
             key={event.id}
