@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { CATEGORIES, mockEvents } from '../data/mockEvents';
 import EventCard from '../components/Home/EventCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/Core/SEO';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Compass, 
   Gamepad2, 
@@ -64,7 +65,29 @@ function CategoryTile({ name, count, isSelected, onClick }) {
 }
 
 export default function Browse() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category');
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory || 'All');
+
+  // Sync state when URL changes
+  useEffect(() => {
+    if (urlCategory && CATEGORIES.includes(urlCategory)) {
+      setSelectedCategory(urlCategory);
+    } else if (!urlCategory) {
+      setSelectedCategory('All');
+    }
+  }, [urlCategory]);
+
+  const handleCategorySelect = (cat) => {
+    setSelectedCategory(cat);
+    if (cat === 'All') {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('category');
+      setSearchParams(newParams);
+    } else {
+      setSearchParams({ category: cat });
+    }
+  };
 
   const liveCounts = useMemo(() => {
     const counts = {};
@@ -124,7 +147,7 @@ export default function Browse() {
             name={cat} 
             count={liveCounts[cat]} 
             isSelected={selectedCategory === cat}
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => handleCategorySelect(cat)}
           />
         ))}
       </section>

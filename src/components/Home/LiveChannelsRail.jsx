@@ -183,7 +183,7 @@ export default function LiveChannelsRail({ collapsed, onToggle }) {
           <section>
             <SectionLabel label="Recommended Categories" collapsed={collapsed} />
             {catViewers.map(({ cat, viewers }) => (
-              <Link key={cat} to="/browse"
+              <Link key={cat} to={`/browse?category=${cat}`}
                 title={collapsed ? cat : undefined}
                 className={`flex items-center py-1.5 hover:bg-white/[0.06] transition-colors group ${collapsed ? 'justify-center px-3 gap-0' : 'gap-2.5 px-3'}`}>
                 <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${CAT_COLORS[cat] || 'from-neutral-700 to-neutral-800'} flex-shrink-0 flex items-center justify-center shadow`}>
