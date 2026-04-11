@@ -77,8 +77,10 @@ const EventGrid = memo(function EventGrid({ useContainer = true }) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const globalQuery = searchParams.get('q') || '';
   
+  const [localQuery, setLocalQuery] = useState('');
+  const [isLiveFilter, setIsLiveFilter] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('recommended');
   const [sortOpen, setSortOpen] = useState(false);
@@ -102,29 +104,32 @@ const EventGrid = memo(function EventGrid({ useContainer = true }) {
   const { hiddenIds } = useStreaming();
 
   const filteredEvents = useMemo(() => {
-    return sessionEvents.filter((event) => {
-      // Bulletproof ID matching - handles string/number mismatches
+    let result = sessionEvents.filter((event) => {
       const isHidden = hiddenIds.some(hid => String(hid) === String(event.id));
       if (isHidden) return false;
 
       const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
-      const matchesSearch = !query || 
-        event.title.toLowerCase().includes(query.toLowerCase()) ||
-        event.creator.toLowerCase().includes(query.toLowerCase()) ||
-        event.category.toLowerCase().includes(query.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const combinedQuery = (globalQuery || localQuery).toLowerCase();
+      const matchesSearch = !combinedQuery || 
+        event.title.toLowerCase().includes(combinedQuery) ||
+        event.creator.toLowerCase().includes(combinedQuery) ||
+        event.category.toLowerCase().includes(combinedQuery);
+      
+      const passesLiveFilter = !isLiveFilter || event.isLive;
+      
+      return matchesCategory && matchesSearch && passesLiveFilter;
     });
 
     // Apply Sorting
     switch (sortBy) {
       case 'viewers-high':
-        result.sort((a, b) => b.viewers - a.viewers);
+        result.sort((a, b) => (b.viewers || 0) - (a.viewers || 0));
         break;
       case 'viewers-low':
-        result.sort((a, b) => a.viewers - b.viewers);
+        result.sort((a, b) => (a.viewers || 0) - (b.viewers || 0));
         break;
       case 'likes':
-        result.sort((a, b) => b.likes - a.likes);
+        result.sort((a, b) => (b.likes || 0) - (a.likes || 0));
         break;
       default:
         result.sort((a, b) => {
@@ -136,7 +141,7 @@ const EventGrid = memo(function EventGrid({ useContainer = true }) {
     }
 
     return result;
-  }, [sessionEvents, activeCategory, sortBy, query, hiddenIds]);
+  }, [sessionEvents, activeCategory, sortBy, globalQuery, localQuery, isLiveFilter, hiddenIds]);
 
   const topRecommended = useMemo(() => {
     return [...sessionEvents]
@@ -153,59 +158,71 @@ const EventGrid = memo(function EventGrid({ useContainer = true }) {
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-indigo-500/8 to-transparent blur-2xl" />
       
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">Explore</p>
-          <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-            {query ? `Search results for "${query}"` : 'Live & Upcoming Events'}
-          </h2>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="relative" ref={sortRef}>
-            <button 
-              onClick={() => setSortOpen(!sortOpen)}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${
-                isLight 
-                  ? 'bg-white border-slate-200 text-slate-700 hover:border-slate-300' 
-                  : 'bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <ListFilter className="w-4 h-4 text-indigo-400" />
-              <span className="text-sm font-semibold">Sort: {activeSortLabel}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${sortOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {sortOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className={`absolute right-0 md:left-0 top-full mt-2 w-56 rounded-2xl border p-2 shadow-2xl z-[100] ${
-                      isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14]/95 border-white/15 backdrop-blur-3xl'
-                  }`}
-                >
-                  {SORT_OPTIONS.map(opt => (
-                    <button 
-                      key={opt.id}
-                      onClick={() => { setSortBy(opt.id); setSortOpen(false); }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
-                          sortBy === opt.id 
-                          ? 'bg-indigo-500 text-white font-bold' 
-                          : 'text-neutral-400 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      {opt.label}
-                      {sortBy === opt.id && <Check className="w-4 h-4" />}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+      <div className="mb-8 flex flex-col gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">Discovery Engine</p>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+              {globalQuery ? `Search results for "${globalQuery}"` : 'Everything Happening Now'}
+            </h2>
           </div>
           
-          <p className="text-sm text-neutral-500 font-medium hidden lg:block">{filteredEvents.length} results</p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+             <div className="relative" ref={sortRef}>
+              <button 
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl border transition-all duration-300 group whitespace-nowrap ${
+                  isLight 
+                    ? 'bg-white border-slate-200 text-slate-700 hover:border-slate-300' 
+                    : 'bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <ListFilter className="w-4 h-4 text-indigo-400" />
+                <span className="text-sm font-semibold">Sort: {activeSortLabel}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${sortOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {sortOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className={`absolute right-0 top-full mt-2 w-56 rounded-2xl border p-2 shadow-2xl z-[100] ${
+                        isLight ? 'bg-white border-slate-200' : 'bg-[#0d0f14]/95 border-white/15 backdrop-blur-3xl'
+                    }`}
+                  >
+                    {SORT_OPTIONS.map(opt => (
+                      <button 
+                        key={opt.id}
+                        onClick={() => { setSortBy(opt.id); setSortOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
+                            sortBy === opt.id 
+                            ? 'bg-indigo-500 text-white font-bold' 
+                            : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        {opt.label}
+                        {sortBy === opt.id && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <button
+              onClick={() => setIsLiveFilter(!isLiveFilter)}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border transition-all text-xs font-bold whitespace-nowrap ${
+                isLiveFilter 
+                  ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
+                  : 'bg-white/5 border-white/10 text-neutral-500 hover:text-white'
+              }`}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${isLiveFilter ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-600'}`} />
+              Live Now
+            </button>
+          </div>
         </div>
       </div>
 

@@ -89,6 +89,8 @@ export default function Browse() {
     }
   };
 
+  const [sortBy, setSortBy] = useState('trending'); // trending, newest
+
   const liveCounts = useMemo(() => {
     const counts = {};
     CATEGORIES.forEach(cat => {
@@ -99,12 +101,23 @@ export default function Browse() {
 
   const filteredEvents = useMemo(() => {
     let result = (selectedCategory === 'All') 
-      ? mockEvents 
+      ? [...mockEvents] 
       : mockEvents.filter((event) => event.category === selectedCategory);
     
-    // Prioritize Live
-    return [...result].sort((a, b) => (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0));
-  }, [selectedCategory]);
+    // Applying Sorting
+    if (sortBy === 'trending') {
+      result.sort((a, b) => {
+         const liveDiff = (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0);
+         if (liveDiff !== 0) return liveDiff;
+         return (b.viewers || 0) - (a.viewers || 0);
+      });
+    } else {
+      // Newest (Live first, then by internal order)
+      result.sort((a, b) => (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0));
+    }
+
+    return result;
+  }, [selectedCategory, sortBy]);
 
   return (
     <div className="app-container py-8 md:py-12 space-y-12 relative overflow-hidden">
@@ -154,12 +167,30 @@ export default function Browse() {
 
       {/* Discovery Feed */}
       <section className="space-y-8 pt-8 border-t border-white/5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
             <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-3">
-               <div className="w-1 h-6 bg-indigo-500 rounded-full" />
+               <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
                {selectedCategory === 'All' ? 'Everything Happening Now' : `Trending in ${selectedCategory}`}
             </h2>
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-[0.3em]">{filteredEvents.length} results</span>
+            
+            <div className="flex items-center gap-2 p-1 rounded-xl bg-white/5 border border-white/10 shrink-0">
+               {[
+                 { id: 'trending', label: 'Trending', icon: <TrendingUp className="w-3 h-3" /> },
+                 { id: 'newest', label: 'Newest', icon: <Compass className="w-3 h-3" /> }
+               ].map((opt) => (
+                 <button
+                   key={opt.id}
+                   onClick={() => setSortBy(opt.id)}
+                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                     sortBy === opt.id 
+                       ? 'bg-white text-black shadow-lg' 
+                       : 'text-neutral-500 hover:text-neutral-300'
+                   }`}
+                 >
+                   {opt.icon} {opt.label}
+                 </button>
+               ))}
+            </div>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-8">
